@@ -6,12 +6,15 @@ Es6Promise.polyfill();
 Vue.use(Vuex);
 
 export const state = {
-
-
+    navBarVisible: false,
+    user: null,
+    userName: null,
 };
 
 export const mutations = {
-
+    toggleNavBar (state) {
+        state.navBarVisible = !state.navBarVisible;
+    }
 };
 
 export const actions = {

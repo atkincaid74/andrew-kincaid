@@ -2,6 +2,7 @@
   <v-navigation-drawer
       app
       clipped
+      :value="navBarVisible"
   >
     <v-list
         dense
@@ -40,8 +41,16 @@
 </template>
 
 <script>
+    import { mapState } from 'vuex';
+
     export default {
-        name: "NavBar"
+        name: "NavBar",
+        computed: {
+          ...mapState({
+              navBarVisible: state => state.navBarVisible,
+
+          })
+        }
     }
 </script>
 

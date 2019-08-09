@@ -1,13 +1,15 @@
 <template>
   <v-app-bar app>
-    <v-app-bar-nav-icon></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon
+            @click="toggleNavDrawer"
+    ></v-app-bar-nav-icon>
     <v-toolbar-title>Andrew Kincaid</v-toolbar-title>
     <v-spacer></v-spacer>
 
     <v-btn
       icon
     >
-    <v-icon>{{ svgIcon }}</v-icon>
+        <v-icon>{{ svgIcon }}</v-icon>
     </v-btn>
     <v-menu>
 
@@ -27,9 +29,17 @@
       }),
       computed: {
         ...mapState({
-
+            user: state => state.user,
         })
-      }
+      },
+      methods: {
+          toggleNavDrawer () {
+              this.$store.commit('toggleNavBar');
+          },
+          userLoginHomepage () {
+
+          }
+      },
   }
 </script>
 
