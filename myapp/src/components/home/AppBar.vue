@@ -3,7 +3,14 @@
     <v-app-bar-nav-icon
             @click="toggleNavDrawer"
     ></v-app-bar-nav-icon>
-    <v-toolbar-title>Andrew Kincaid</v-toolbar-title>
+    <v-toolbar-title>
+        <v-btn
+            text
+            @click="goHome"
+        >
+            Andrew Kincaid
+        </v-btn>
+    </v-toolbar-title>
     <v-spacer></v-spacer>
 
     <v-btn
@@ -40,6 +47,9 @@
               if (this.user == null) {
                   this.$router.push({name: 'Login'});
               }
+          },
+          goHome () {
+              this.$router.push({name: 'Home'});
           }
       },
   }
