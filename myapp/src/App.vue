@@ -3,7 +3,7 @@
     <NavBar></NavBar>
     <AppBar></AppBar>
     <v-content>
-      <HelloWorld/>
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>

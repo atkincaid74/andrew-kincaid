@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from '../store';
 
-import App from "../App";
+import HelloWorld from "../components/HelloWorld";
+import Login from "../components/home/Login";
 
 Vue.use(Router);
 
@@ -10,8 +11,13 @@ const routes = [
     {
         path: '/',
         name: 'Home',
-        component: App,
-    }
+        component: HelloWorld,
+    },
+    {
+        path: '/login',
+        name: 'Login',
+        component: Login,
+    },
 ];
 
 const router = new Router({

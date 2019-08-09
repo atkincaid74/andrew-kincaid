@@ -8,6 +8,7 @@
 
     <v-btn
       icon
+      @click="goToUserLoginHomepage"
     >
         <v-icon>{{ svgIcon }}</v-icon>
     </v-btn>
@@ -25,7 +26,6 @@
       name: "AppBar",
       data: () => ({
           svgIcon: mdiAccountCircle,
-
       }),
       computed: {
         ...mapState({
@@ -36,8 +36,10 @@
           toggleNavDrawer () {
               this.$store.commit('toggleNavBar');
           },
-          userLoginHomepage () {
-
+          goToUserLoginHomepage () {
+              if (this.user == null) {
+                  this.$router.push({name: 'Login'});
+              }
           }
       },
   }
