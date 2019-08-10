@@ -18,7 +18,9 @@ export const mutations = {
 };
 
 export const actions = {
+    submitLoginInfo(username, password) {
 
+    }
 };
 
 export default new Vuex.Store({
