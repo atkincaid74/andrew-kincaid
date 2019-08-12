@@ -8,8 +8,13 @@ Vue.use(Vuex);
 
 export const state = {
     navBarVisible: false,
-    user: null,
     username: null,
+    userFirstName: '',
+    userLastName: '',
+    userPaid: false,
+    displaySnackbar: false,
+    snackbarMessage: '',
+    snackbarColor: 'error',
 };
 
 export const mutations = {
@@ -19,20 +24,40 @@ export const mutations = {
     setUser (state, payload) {
         state.user = payload.username;
     },
+    toggleDisplaySnackbar (state) {
+        state.displaySnackbar = !state.displaySnackbar;
+    },
+    setSnackbarMessage (state, payload) {
+        state.snackbarMessage = payload;
+    },
+    setSnackbarColor (state, payload) {
+        state.snackbarColor = payload;
+    },
 };
 
 export const actions = {
     submitLoginInfo(username, password) {
 
     },
-    createNewUser({}, payload) {
-        try {
-            const response = DjangoAPI.createNewUser(payload);
-            if (Promise.resolve(response).data === 'Success') {
+    async createNewUser({ commit, state }, payload) {
+        const response = await DjangoAPI.createNewUser(payload);
+        console.log(response);
+        const data = response.data;
 
-            }
-        } catch (e) {
-            throw e;
+        if (data === 'Success') {
+            console.log('got it')
+        } else if (data.startsWith('Email already')) {
+            commit('setSnackbarMessage', 'Email already associated with an account');
+            commit('setSnackbarColor', 'error');
+            commit('toggleDisplaySnackbar');
+        } else if (data.startsWith('Username')) {
+            commit('setSnackbarMessage', 'Username already taken');
+            commit('setSnackbarColor', 'error');
+            commit('toggleDisplaySnackbar');
+        } else {
+            commit('setSnackbarMessage', 'Email hasn\'t been approved. Email nflpickem6.9@gmail.com with problems.');
+            commit('setSnackbarColor', 'error');
+            commit('toggleDisplaySnackbar');
         }
     },
 };
