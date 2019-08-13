@@ -17,7 +17,7 @@
       icon
       @click="goToUserLoginHomepage"
     >
-        <v-icon>{{ svgIcon }}</v-icon>
+        <UserIcon></UserIcon>
     </v-btn>
     <v-menu>
 
@@ -26,33 +26,36 @@
 </template>
 
 <script>
-  import { mdiAccountCircle } from '@mdi/js';
-  import { mapState } from 'vuex';
+    import UserIcon from "./UserIcon";
+    import { mapState } from 'vuex';
 
-  export default {
-      name: "AppBar",
-      data: () => ({
-          svgIcon: mdiAccountCircle,
-      }),
-      computed: {
+    export default {
+        name: "AppBar",
+        components: {
+          UserIcon
+        },
+        data: () => ({
+
+        }),
+        computed: {
         ...mapState({
             user: state => state.user,
         })
-      },
-      methods: {
-          toggleNavDrawer () {
+        },
+        methods: {
+            toggleNavDrawer () {
               this.$store.commit('toggleNavBar');
-          },
-          goToUserLoginHomepage () {
+            },
+            goToUserLoginHomepage () {
               if (this.user == null) {
                   this.$router.push({name: 'Login'});
               }
-          },
-          goHome () {
+            },
+            goHome () {
               this.$router.push({name: 'Home'});
-          }
-      },
-  }
+            }
+        },
+    }
 </script>
 
 <style scoped>

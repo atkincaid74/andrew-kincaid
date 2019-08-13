@@ -22,7 +22,16 @@ export const mutations = {
         state.navBarVisible = !state.navBarVisible;
     },
     setUser (state, payload) {
-        state.user = payload.username;
+        state.username = payload;
+    },
+    setUserFirstName (state, payload) {
+        state.userFirstName = payload;
+    },
+    setUserLastName (state, payload) {
+        state.userLastName = payload;
+    },
+    setUserPaid (state, payload) {
+        state.userPaid = payload;
     },
     toggleDisplaySnackbar (state) {
         state.displaySnackbar = !state.displaySnackbar;
@@ -45,7 +54,9 @@ export const actions = {
         const data = response.data;
 
         if (data === 'Success') {
-            console.log('got it')
+            commit('setUser', payload.username);
+            commit('setUserFirstName', payload.firstName);
+            commit('setUserLastName', payload.lastName);
         } else if (data.startsWith('Email already')) {
             commit('setSnackbarMessage', 'Email already associated with an account');
             commit('setSnackbarColor', 'error');
