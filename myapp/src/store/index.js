@@ -9,6 +9,7 @@ Vue.use(Vuex);
 
 export const state = {
     navBarVisible: false,
+    token: null,
     username: null,
     userFirstName: '',
     userLastName: '',
@@ -21,6 +22,9 @@ export const state = {
 export const mutations = {
     toggleNavBar (state) {
         state.navBarVisible = !state.navBarVisible;
+    },
+    setToken (state, payload) {
+        state.token = payload;
     },
     setUser (state, payload) {
         state.username = payload;
@@ -50,9 +54,7 @@ export const actions = {
         const response = await DjangoAPI.getToken(payload);
         try {
             commit('setUser', payload.username);
-            this.$session.start();
-            this.$session.set('token', response.data.token);
-            console.log('success');
+            commit('setToken', payload.token);
             return response
         } catch (e) {
             // todo fill out
@@ -95,6 +97,13 @@ export const actions = {
         } catch (e) {
             return Promise.reject(response)
         }
+    },
+    logout({ commit, state }) {
+        commit('setToken', null);
+        commit('setUser', null);
+        commit('setUserFirstName', null);
+        commit('setUserLastName', null);
+        commit('setUserPaid', null);
     }
 };
 
@@ -111,6 +120,7 @@ export default new Vuex.Store({
                 'userFirstName',
                 'userLastName',
                 'userPaid',
+                'token',
             ]
         })
     ]
