@@ -37,7 +37,7 @@
                 >Create Account</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn
-                        @click=""
+                        @click="submitLoginInfo"
                 >Login
                 </v-btn>
             </v-card-actions>
@@ -89,7 +89,14 @@
         }),
         methods: {
             submitLoginInfo() {
-
+                this.$store.dispatch('getToken', { username: this.enteredUser, password: this.enteredPass })
+                    .then(this.getUserInfo())
+                    .catch(e => console.log(e))
+            },
+            getUserInfo() {
+                this.$store.dispatch('getUserInfo', { username: this.enteredUser })
+                    .then(this.$router.push({name: 'Home'}))
+                    .catch(e => console.log(e))
             },
             toggleCreateUserDialog() {
                 this.createUserDialog = !this.createUserDialog;

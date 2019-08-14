@@ -171,7 +171,8 @@
                     password: this.password,
                     email: this.email,
                 };
-                console.log(this.$store.dispatch('createNewUser', payload));
+                this.$store.dispatch('createNewUser', payload)
+                    .then(this.closeDialog)
             },
             closeDialog() {
                 this.$emit('close-new-user', 'toggleCreateUserDialog')

@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Es6Promise from 'es6-promise';
 import DjangoAPI from '../services/api/DjangoService';
+import createPersistedState from "vuex-persistedstate";
 
 Es6Promise.polyfill();
 Vue.use(Vuex);
@@ -45,8 +46,18 @@ export const mutations = {
 };
 
 export const actions = {
-    submitLoginInfo(username, password) {
-
+    async getToken({ commit, state }, payload) {
+        const response = await DjangoAPI.getToken(payload);
+        try {
+            commit('setUser', payload.username);
+            this.$session.start();
+            this.$session.set('token', response.data.token);
+            console.log('success');
+            return response
+        } catch (e) {
+            // todo fill out
+            return Promise.reject(response)
+        }
     },
     async createNewUser({ commit, state }, payload) {
         const response = await DjangoAPI.createNewUser(payload);
@@ -71,10 +82,36 @@ export const actions = {
             commit('toggleDisplaySnackbar');
         }
     },
+    async getUserInfo({ commit, state }, payload) {
+        const response = await DjangoAPI.getUserInfo(payload);
+        const data = response.data;
+
+        try {
+            console.log(response);
+            commit('setUserFirstName', data.firstName);
+            commit('setUserLastName', data.lastName);
+            commit('setUserPaid', data.paid);
+            return Promise.resolve(response)
+        } catch (e) {
+            return Promise.reject(response)
+        }
+    }
 };
 
 export default new Vuex.Store({
     state,
     mutations,
-    actions
+    actions,
+    plugins: [
+        createPersistedState({
+            storage: window.sessionStorage,
+            paths: [
+                'username',
+                'username',
+                'userFirstName',
+                'userLastName',
+                'userPaid',
+            ]
+        })
+    ]
 })

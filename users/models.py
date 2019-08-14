@@ -11,7 +11,7 @@ class ValidEmails(models.Model):
     date_paid = models.DateTimeField(null=True)
 
     def add_email(self, email, paid: bool = False):
-        self.email = email
+        self.email = email.lower()
         self.paid = paid
         self.date_added = timezone.now()
         self.date_paid = timezone.now() if paid else None

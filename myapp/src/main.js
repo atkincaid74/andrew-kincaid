@@ -4,8 +4,10 @@ import vuetify from './plugins/vuetify';
 import store from './store';
 import { router } from "./router";
 import axios from 'axios';
+import VueSession from 'vue-session';
 
 Vue.config.productionTip = false;
+Vue.use(VueSession);
 
 new Vue({
   vuetify,

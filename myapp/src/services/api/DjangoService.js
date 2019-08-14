@@ -7,4 +7,16 @@ export default {
             .then(response => (response))
             .catch(err => {console.log(err); throw err.response})
     },
+    getToken(payload) {
+        return axios
+            .post('/api/auth/', payload)
+            .then(response => (response))
+            .catch(err => {console.log(err); throw err.response})
+    },
+    getUserInfo(payload) {
+        return axios
+            .post('/api/get_user_info/', payload)
+            .then(response => (response))
+            .catch(err => {console.log(err); throw err.response})
+    }
 }

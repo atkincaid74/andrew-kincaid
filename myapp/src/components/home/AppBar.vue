@@ -39,7 +39,7 @@
         }),
         computed: {
         ...mapState({
-            user: state => state.user,
+            username: state => state.username,
         })
         },
         methods: {
@@ -47,8 +47,10 @@
               this.$store.commit('toggleNavBar');
             },
             goToUserLoginHomepage () {
-              if (this.user == null) {
+              if (this.username == null) {
                   this.$router.push({name: 'Login'});
+              } else {
+                  this.$router.push({name: 'UserHome'})
               }
             },
             goHome () {

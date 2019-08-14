@@ -4,6 +4,7 @@ import store from '../store';
 
 import HelloWorld from "../components/HelloWorld";
 import Login from "../components/home/Login";
+import UserHomepage from "../components/home/UserHomepage";
 
 Vue.use(Router);
 
@@ -18,6 +19,11 @@ const routes = [
         name: 'Login',
         component: Login,
     },
+    {
+        path: '/userhome',
+        name: 'UserHome',
+        component: UserHomepage,
+    }
 ];
 
 const router = new Router({
