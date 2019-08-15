@@ -1,12 +1,14 @@
 <template>
-  <v-app>
-    <Snackbar></Snackbar>
-    <NavBar></NavBar>
-    <AppBar></AppBar>
-    <v-content>
-      <router-view></router-view>
-    </v-content>
-  </v-app>
+  <div id="app">
+    <v-app>
+      <Snackbar></Snackbar>
+      <NavBar></NavBar>
+      <AppBar></AppBar>
+      <v-content>
+        <router-view></router-view>
+      </v-content>
+    </v-app>
+  </div>
 </template>
 
 <script>
