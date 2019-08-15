@@ -9,7 +9,11 @@
             nav
             class="py-0"
         >
-            <v-list-item two-line>
+            <v-list-item
+                two-line
+                v-if="username !== null"
+                @click="goToUserHomepage"
+            >
                 <v-list-item-avatar>
                     <UserIcon></UserIcon>
                 </v-list-item-avatar>
@@ -59,10 +63,16 @@
             fullName () {
                 return this.userFirstName + ' ' + this.userLastName
             },
-            userIcon () {
-                return !!this.username ? mdiAccountCircle : mdiAccountCircleOutline
+        },
+        methods: {
+            goToUserHomepage () {
+                this.$router.push({name: 'UserHome'});
+                this.toggleNavBar()
+            },
+            toggleNavBar () {
+                this.$store.commit('toggleNavBar')
             }
-        }
+        },
     }
 </script>
 
