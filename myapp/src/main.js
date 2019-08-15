@@ -17,3 +17,4 @@ new Vue({
 }).$mount('#app');
 
 axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.headers['Authorization'] = `JWT ${store.state.token}`;

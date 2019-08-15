@@ -54,7 +54,7 @@ export const actions = {
         const response = await DjangoAPI.getToken(payload);
         try {
             commit('setUser', payload.username);
-            commit('setToken', payload.token);
+            commit('setToken', response.data.token);
             return response
         } catch (e) {
             // todo fill out
