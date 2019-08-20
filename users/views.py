@@ -3,11 +3,15 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from .models import ValidEmails
+from rest_framework_jwt.views import (ObtainJSONWebToken, RefreshJSONWebToken,
+                                      VerifyJSONWebToken)
 
 
 class CreateNewUserView(APIView):
     renderer_classes = (JSONRenderer, )
+    permission_classes = (AllowAny, )
 
     def post(self, request, format=None):
         data = request.data
@@ -57,3 +61,17 @@ class GetUserInfo(APIView):
         )
 
         return Response(output)
+
+
+class AllowedObtainJSONWebToken(ObtainJSONWebToken):
+    permission_classes = (AllowAny, )
+
+
+class AllowedRefreshJSONWebToken(RefreshJSONWebToken):
+    permission_classes = (AllowAny, )
+
+
+class AllowedVerifyJSONWebToken(VerifyJSONWebToken):
+    permission_classes = (AllowAny, )
+
+
