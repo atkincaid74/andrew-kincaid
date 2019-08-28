@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Choice, Question
+from users.models import ValidEmails
 
 
 class ChoiceInline(admin.TabularInline):
@@ -21,3 +22,4 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Question, QuestionAdmin)
+admin.site.register(ValidEmails)
