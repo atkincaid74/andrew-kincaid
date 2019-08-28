@@ -63,7 +63,6 @@ export const actions = {
     },
     async createNewUser({ commit, state }, payload) {
         const response = await DjangoAPI.createNewUser(payload);
-        console.log(response);
         const data = response.data;
 
         if (data === 'Success') {
@@ -87,9 +86,7 @@ export const actions = {
     async getUserInfo({ commit, state }, payload) {
         const response = await DjangoAPI.getUserInfo(payload);
         const data = response.data;
-
         try {
-            console.log(response);
             commit('setUserFirstName', data.firstName);
             commit('setUserLastName', data.lastName);
             commit('setUserPaid', data.paid);
