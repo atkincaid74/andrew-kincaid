@@ -20,7 +20,7 @@ from rest_framework_simplejwt import views as jwt_views
 from .views import redirect_view
 
 urlpatterns = [
-    path('', include('polls.urls')),
+    path('', redirect_view),
     path('', include('users.urls')),
     path('admin/', admin.site.urls),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(),

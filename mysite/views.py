@@ -9,5 +9,5 @@ from rest_framework.renderers import JSONRenderer
 
 
 def redirect_view(request):
-    response = redirect('/polls/')
+    response = redirect('/admin/')
     return response
