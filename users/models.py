@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db import models
 
 
-class ValidEmails(models.Model):
+class ValidEmail(models.Model):
     email = models.EmailField()
     paid = models.BooleanField()
     date_added = models.DateTimeField()

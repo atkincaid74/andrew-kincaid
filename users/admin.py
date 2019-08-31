@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-from .models import ValidEmails
+from .models import ValidEmail
 
-admin.site.register(ValidEmails)
+admin.site.register(ValidEmail)

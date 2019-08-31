@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .models import ValidEmails
+from .models import ValidEmail
 from rest_framework_jwt.views import (ObtainJSONWebToken, RefreshJSONWebToken,
                                       VerifyJSONWebToken)
 
@@ -25,7 +25,7 @@ class CreateNewUserView(APIView):
             return HttpResponse('Username already taken')
 
         else:
-            if ValidEmails.objects.filter(email=email).exists():
+            if ValidEmail.objects.filter(email=email).exists():
                 user = User.objects.create_user(username, email,
                                                 data['password'])
                 user.first_name = data['firstName']
@@ -50,7 +50,7 @@ class GetUserInfo(APIView):
         last_name = user_record.last_name
         email = user_record.email
 
-        email_record = ValidEmails.objects.filter(email=email).first()
+        email_record = ValidEmail.objects.filter(email=email).first()
         paid = email_record.paid
 
         output = dict(
