@@ -32,3 +32,11 @@ class SeasonPickem(models.Model):
     def __str__(self):
         return f"{self.game}, Andrew-{self.andrew_pick}, " \
                f"Steve-{self.steve_pick}"
+
+
+class Winner(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    winner = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.game}, Winner - {self.winner}"

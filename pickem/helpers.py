@@ -1,5 +1,6 @@
 import pandas as pd
 from .models import SeasonPickem
+from nflgame import games
 
 
 def get_pickem_results():
@@ -14,7 +15,8 @@ def get_pickem_results():
         away_team = str(p.game.away_team)
         andrew_pick = p.andrew_pick.city
         steve_pick = p.steve_pick.city
-        winner = p.andrew_pick.city
+        winner = 0
+
         data.append(
             {
                 'week': week,
