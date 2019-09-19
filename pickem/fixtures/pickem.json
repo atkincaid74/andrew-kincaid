@@ -1,196 +1,290 @@
 [
   {
-    "model": "pickem.teams",
-    "id": 1,
-    "fields": {
-      "city": "Arizona", "nickname": "Cardinals"
+    "model":"pickem.team",
+    "pk":1,
+    "fields":{
+      "city":"Arizona",
+      "nickname":"Cardinals",
+      "abbr":"ARI"
     }
   },
   {
-    "model": "pickem.teams",
-    "id": 2,
-    "fields": {
-      "city":"Atlanta","nickname":"Falcons"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 3,
-    "fields": {
-      "city":"Baltimore","nickname":"Ravens"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 4,
-    "fields": {
-      "city":"Buffalo","nickname":"Bills"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 5,
-    "fields": {
-      "city":"Carolina","nickname":"Panthers"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 6,
-    "fields": {
-      "city":"Chicago","nickname":"Bears"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 7,
-    "fields": {
-      "city":"Cincinnati","nickname":"Bengals"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 8,
-    "fields": {
-      "city":"Cleveland","nickname":"Browns"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 9,
-    "fields": {
-      "city":"Dallas","nickname":"Cowboys"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 10,
-    "fields": {
-      "city":"Denver","nickname":"Broncos"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 11,
-    "fields": {
-      "city":"Detroit","nickname":"Lions"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 12,
-    "fields": {
-      "city":"Green Bay","nickname":"Packers"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 13,
-    "fields": {
-      "city":"Houston","nickname":"Texans"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 14,
-    "fields": {
-      "city":"Indianapolis","nickname":"Colts"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 15,
-    "fields": {
-      "city":"Jacksonville","nickname":"Jaguars"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 16,
-    "fields": {
-      "city":"Kansas City","nickname":"Chiefs"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 17,
-    "fields": {
-      "city":"Los Angeles","nickname":"Chargers"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 18,
-    "fields": {
-      "city":"Los Angeles","nickname":"Rams"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 19,
-    "fields": {
-      "city":"Miami","nickname":"Dolphins"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 20,
-    "fields": {
-      "city":"Minnesota","nickname":"Vikings"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 21,
-    "fields": {
-      "city":"New England","nickname":"Patriots"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 22,
-    "fields": {
-      "city":"New Orleans","nickname":"Saints"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 23,
-    "fields": {
-      "city":"New York","nickname":"Giants"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 24,
-    "fields": {
-      "city":"New York","nickname":"Jets"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 25,
-    "fields": {
-      "city":"Oakland","nickname":"Raiders"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 26,
-    "fields": {
-      "city":"Philadelphia","nickname":"Eagles"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 27,
-    "fields": {
-      "city":"Pittsburgh","nickname":"Steelers"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 28,
-    "fields": {
-      "city":"San Francisco","nickname":"49ers"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 29,
-    "fields": {
-      "city":"Seattle","nickname":"Seahawks"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 30,
-    "fields": {
-      "city":"Tampa Bay","nickname":"Buccaneers"}
-    },
-  {
-    "model": "pickem.teams",
-    "id": 31,
-    "fields": {
-      "city":"Tennessee","nickname":"Titans"}
-    },
-  {
-    "model":"pickem.teams",
-    "id": 32,
+    "model":"pickem.team",
+    "pk":2,
     "fields":{
-      "city":"Washington","nickname":"Redskins"
+      "city":"Atlanta",
+      "nickname":"Falcons",
+      "abbr":"ATL"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":3,
+    "fields":{
+      "city":"Baltimore",
+      "nickname":"Ravens",
+      "abbr":"BAL"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":4,
+    "fields":{
+      "city":"Buffalo",
+      "nickname":"Bills",
+      "abbr":"BUF"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":5,
+    "fields":{
+      "city":"Carolina",
+      "nickname":"Panthers",
+      "abbr":"CAR"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":6,
+    "fields":{
+      "city":"Chicago",
+      "nickname":"Bears",
+      "abbr":"CHI"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":7,
+    "fields":{
+      "city":"Cincinnati",
+      "nickname":"Bengals",
+      "abbr":"CIN"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":8,
+    "fields":{
+      "city":"Cleveland",
+      "nickname":"Browns",
+      "abbr":"CLE"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":9,
+    "fields":{
+      "city":"Dallas",
+      "nickname":"Cowboys",
+      "abbr":"DAL"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":10,
+    "fields":{
+      "city":"Denver",
+      "nickname":"Broncos",
+      "abbr":"DEN"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":11,
+    "fields":{
+      "city":"Detroit",
+      "nickname":"Lions",
+      "abbr":"DET"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":12,
+    "fields":{
+      "city":"Green Bay",
+      "nickname":"Packers",
+      "abbr":"GB"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":13,
+    "fields":{
+      "city":"Houston",
+      "nickname":"Texans",
+      "abbr":"HOU"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":14,
+    "fields":{
+      "city":"Indianapolis",
+      "nickname":"Colts",
+      "abbr":"IND"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":15,
+    "fields":{
+      "city":"Jacksonville",
+      "nickname":"Jaguars",
+      "abbr":"JAX"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":16,
+    "fields":{
+      "city":"Kansas City",
+      "nickname":"Chiefs",
+      "abbr":"KC"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":17,
+    "fields":{
+      "city":"Los Angeles",
+      "nickname":"Chargers",
+      "abbr":"LAC"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":18,
+    "fields":{
+      "city":"Los Angeles",
+      "nickname":"Rams",
+      "abbr":"LA"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":19,
+    "fields":{
+      "city":"Miami",
+      "nickname":"Dolphins",
+      "abbr":"MIA"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":20,
+    "fields":{
+      "city":"Minnesota",
+      "nickname":"Vikings",
+      "abbr":"MIN"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":21,
+    "fields":{
+      "city":"New England",
+      "nickname":"Patriots",
+      "abbr":"NE"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":22,
+    "fields":{
+      "city":"New Orleans",
+      "nickname":"Saints",
+      "abbr":"NO"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":23,
+    "fields":{
+      "city":"New York",
+      "nickname":"Giants",
+      "abbr":"NYG"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":24,
+    "fields":{
+      "city":"New York",
+      "nickname":"Jets",
+      "abbr":"NYJ"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":25,
+    "fields":{
+      "city":"Oakland",
+      "nickname":"Raiders",
+      "abbr":"OAK"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":26,
+    "fields":{
+      "city":"Philadelphia",
+      "nickname":"Eagles",
+      "abbr":"PHI"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":27,
+    "fields":{
+      "city":"Pittsburgh",
+      "nickname":"Steelers",
+      "abbr":"PIT"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":28,
+    "fields":{
+      "city":"San Francisco",
+      "nickname":"49ers",
+      "abbr":"SF"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":29,
+    "fields":{
+      "city":"Seattle",
+      "nickname":"Seahawks",
+      "abbr":"SEA"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":30,
+    "fields":{
+      "city":"Tampa Bay",
+      "nickname":"Buccaneers",
+      "abbr":"TB"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":31,
+    "fields":{
+      "city":"Tennessee",
+      "nickname":"Titans",
+      "abbr":"TEN"
+    }
+  },
+  {
+    "model":"pickem.team",
+    "pk":32,
+    "fields":{
+      "city":"Washington",
+      "nickname":"Redskins",
+      "abbr":"WAS"
     }
   },
   {

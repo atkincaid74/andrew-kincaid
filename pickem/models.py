@@ -4,6 +4,7 @@ from django.db import models
 class Team(models.Model):
     city = models.TextField(max_length=64)
     nickname = models.TextField(max_length=64)
+    abbr = models.TextField(max_length=4)
 
     def __str__(self):
         return f"{self.city} {self.nickname}"
