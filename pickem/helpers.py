@@ -1,33 +1,57 @@
 import pandas as pd
-from .models import SeasonPickem
+from .models import SeasonPickem, Team, Winner
 from nflgame import games
+from django.utils import timezone
 
 
-def get_pickem_results():
+def get_game_results():
     pickem = SeasonPickem.objects.select_related().all()
-
-    # do the nflgame stuff here
 
     data = []
     for p in pickem:
         week = p.game.week
-        home_team = str(p.game.home_team)
-        away_team = str(p.game.away_team)
+        home_team = p.game.home_team
+        away_team = p.game.away_team
         andrew_pick = p.andrew_pick.city
         steve_pick = p.steve_pick.city
-        winner = 0
-
-        data.append(
-            {
-                'week': week,
-                'home_team': home_team,
-                'away_team': away_team,
-                'andrew_pick': andrew_pick,
-                'steve_pick': steve_pick,
-                'winner': winner,
-            }
-        )
+        winner = Winner.objects.filter(game=p.game).first()
+        if winner is not None:
+            data.append(
+                {
+                    'Week': week,
+                    'Home Team': str(home_team),
+                    'Away Team': str(away_team),
+                    'Andrew\'s Pick': andrew_pick,
+                    'Steve\'s Pick': steve_pick,
+                    'Winner': winner.winner.city,
+                }
+            )
 
     df = pd.DataFrame.from_records(data)
 
     return df
+
+
+def update_winners(week):
+    # get all games in week
+    pickem = SeasonPickem.objects.select_related()\
+        .filter(game__week=week).all()
+
+    # get results for week
+    game_list = games(timezone.now().year, week=week)
+    game_dict = {(g.away, g.home): g for g in game_list}
+
+    for p in pickem:
+        game = p.game
+        winner = Winner.objects.filter(game=game).first()
+        if winner is None:
+            game_results = game_dict.get(
+                (game.away_team.abbr, game.home_team.abbr)
+            )
+            if game_results is not None:
+                winner_abbr = game_results.winner
+                if len(winner_abbr) > 3:
+                    winner_abbr = 'TIE'
+                winner = Team.objects.filter(abbr=winner_abbr).first()
+                new_winner = Winner(game=game, winner=winner)
+                new_winner.save()
