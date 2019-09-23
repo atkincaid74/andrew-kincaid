@@ -1,7 +1,7 @@
 import pandas as pd
 from .models import SeasonPickem, Team, Winner
 from nflgame import games
-from django.utils import timezone
+from nflgame.live import current_year_and_week
 
 
 def get_game_results():
@@ -32,13 +32,18 @@ def get_game_results():
     return df
 
 
-def update_winners(week):
+def update_winners(week=None):
+    # get current year and week
+    year, week_ = current_year_and_week()
+
+    week = week if week is not None else week_
+
     # get all games in week
     pickem = SeasonPickem.objects.select_related()\
         .filter(game__week=week).all()
 
     # get results for week
-    game_list = games(timezone.now().year, week=week)
+    game_list = games(year, week=week)
     game_dict = {(g.away, g.home): g for g in game_list}
 
     for p in pickem:

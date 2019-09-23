@@ -1,2 +1,4 @@
 if __name__ == '__main__':
-    print('ok')
+    from .helpers import update_winners
+
+    update_winners()
