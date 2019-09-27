@@ -4,6 +4,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from .models import Game, SeasonPickem
 from .serializers import SeasonPickemSerializer, GameSerializer
+from .helpers import update_winners, get_game_results
 import pandas as pd
 
 
@@ -24,9 +25,12 @@ class GetGamesView(APIView):
 class GetPicksView(APIView):
     renderer_classes = (JSONRenderer, )
 
-    def get(self, request):
+    def post(self, request):
+        return Response(get_game_results().to_json(orient='records'))
 
 
-        return Response(JSONRenderer().render(
-            SeasonPickemSerializer(SeasonPickem.objects.all(), many=True).data
-        ))
+class UpdateWinnersView(APIView):
+    def post(self, request):
+        update_winners()
+
+        return Response('success')
