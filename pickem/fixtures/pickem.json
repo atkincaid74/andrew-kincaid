@@ -288,6 +288,15 @@
     }
   },
   {
+    "model":"pickem.team",
+    "pk":33,
+    "fields":{
+      "city":"Tie",
+      "nickname":"Tie",
+      "abbr":"TIE"
+    }
+  },
+  {
     "model":"pickem.game",
     "pk":0,
     "fields":{
