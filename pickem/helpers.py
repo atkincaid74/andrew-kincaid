@@ -55,8 +55,18 @@ def update_winners(week=None):
             )
             if game_results is not None:
                 winner_abbr = game_results.winner
-                if len(winner_abbr) > 3:
-                    winner_abbr = 'TIE'
-                winner = Team.objects.filter(abbr=winner_abbr).first()
-                new_winner = Winner(game=game, winner=winner)
-                new_winner.save()
+                if winner_abbr is not None:
+                    if len(winner_abbr) > 3:
+                        winner_abbr = 'TIE'
+                    winner = Team.objects.filter(abbr=winner_abbr).first()
+                    new_winner = Winner(game=game, winner=winner)
+                    new_winner.save()
+
+
+def get_summary(week=None):
+    if week is None:
+        pass
+    else:
+        assert isinstance(week, int)
+        assert 0 < week < 17
+    return None
