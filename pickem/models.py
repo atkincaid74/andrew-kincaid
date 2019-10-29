@@ -1,4 +1,5 @@
 from django.db import models
+from itertools import chain
 
 
 class Team(models.Model):
@@ -33,6 +34,16 @@ class SeasonPickem(models.Model):
         return f"{self.game}, Andrew-{self.andrew_pick}, " \
                f"Steve-{self.steve_pick}"
 
+    def to_dict(self):
+        opts = self._meta
+        data = {}
+        for f in chain(opts.concrete_fields, opts.private_fields):
+            data[f.name] = f.value_from_object(self)
+        for f in opts.many_to_many:
+            data[f.name] = [i.id for i in f.value_from_object(self)]
+        data['week'] = self.game.week
+        return data
+
 
 class Winner(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
@@ -40,3 +51,12 @@ class Winner(models.Model):
 
     def __str__(self):
         return f"{self.game}, Winner - {self.winner}"
+
+    def to_dict(self):
+        opts = self._meta
+        data = {}
+        for f in chain(opts.concrete_fields, opts.private_fields):
+            data[f.name] = f.value_from_object(self)
+        for f in opts.many_to_many:
+            data[f.name] = [i.id for i in f.value_from_object(self)]
+        return data

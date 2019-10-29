@@ -63,10 +63,29 @@ def update_winners(week=None):
                     new_winner.save()
 
 
-def get_summary(week=None):
-    if week is None:
-        pass
-    else:
-        assert isinstance(week, int)
-        assert 0 < week < 17
-    return None
+def get_summary():
+    season = SeasonPickem.objects.all()
+    season = [s.to_dict() for s in season]
+
+    winners = Winner.objects.all()
+    winners = [w.to_dict() for w in winners]
+
+    df = pd.merge(pd.DataFrame.from_records(season),
+                  pd.DataFrame.from_records(winners),
+                  on='game', how='inner')
+
+    df['andrew_win'] = df['andrew_pick'] == df['winner']
+    df['steve_win'] = df['steve_pick'] == df['winner']
+
+    df1 = df[['week', 'andrew_win', 'steve_win']].melt(
+        'week', var_name='player')
+    df1 = df1.groupby(['week', 'player', 'value']).size().unstack(fill_value=0)
+    df1 = df1.append(pd.concat(
+        [df1.groupby('player').sum()], keys=['Total'], names=['week']
+    ))
+    df1['record'] = df1.apply(lambda x: f'{x[True]} - {x[False]}', axis=1)
+
+    df2 = df1.reset_index().pivot(index='week', columns='player',
+                                  values='record')
+
+    return df2

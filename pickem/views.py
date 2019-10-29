@@ -40,7 +40,7 @@ class GetPickSummaryView(APIView):
     renderer_classes = (JSONRenderer, )
 
     @staticmethod
-    def get():
+    def get(request):
         df = get_summary()
 
-        return Response(df.to_json(orient='records'))
+        return Response(df.reset_index().to_json(orient='records'))
