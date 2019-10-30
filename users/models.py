@@ -1,7 +1,6 @@
-import datetime
-
 from django.utils import timezone
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class ValidEmail(models.Model):
@@ -22,5 +21,21 @@ class ValidEmail(models.Model):
         return self.email
 
 
-class Privilege(models.Model):
-    pass
+class PrivilegeLookup(models.Model):
+    privilege = models.TextField(max_length=32)
+
+    def add_privilege(self, privilege):
+        self.privilege = privilege
+
+        self.save()
+
+    def __str__(self):
+        return self.privilege
+
+
+class UserPrivilege(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    privilege = models.ForeignKey(PrivilegeLookup, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user} - {self.privilege.privilege}"
