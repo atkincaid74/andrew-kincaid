@@ -75,3 +75,17 @@ class AllowedVerifyJSONWebToken(VerifyJSONWebToken):
     permission_classes = (AllowAny, )
 
 
+class AddNewValidEmail(APIView):
+    def post(self, request):
+        email = request.data['email']
+        paid = request.data['paid']
+        if not ValidEmail.objects.filter(email=email):
+            ValidEmail().add_email(email, paid)
+            return Response('Email submitted successfully.')
+        else:
+            v = ValidEmail.objects.filter(email=email).first()
+            v.paid = paid
+            v.save()
+            response = 'paid' if paid else 'unpaid'
+            return Response(f'Email marked as {response}.')
+
