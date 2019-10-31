@@ -44,6 +44,8 @@ class CreateNewUserView(APIView):
 
                     u.save()
 
+                privileges.delete()
+
                 return HttpResponse('Success')
 
             else:
