@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from rest_framework.views import APIView
@@ -67,11 +68,15 @@ class GetUserInfo(APIView):
         email_record = ValidEmail.objects.filter(email=email).first()
         paid = email_record.paid
 
+        priv_records = UserPrivilege.objects.filter(user=user_record).all()
+        privileges = [p.privilege.privilege for p in priv_records]
+
         output = dict(
             firstName=first_name,
             lastName=last_name,
             email=email,
             paid=paid,
+            privileges=json.dumps(privileges),
         )
 
         return Response(output)
