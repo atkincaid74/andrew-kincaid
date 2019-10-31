@@ -25,13 +25,25 @@ class CreateNewUserView(APIView):
             return HttpResponse('Username already taken')
 
         else:
-            if ValidEmail.objects.filter(email=email).exists():
+            v = ValidEmail.objects.filter(email=email)
+            if v.exists():
                 user = User.objects.create_user(username, email,
                                                 data['password'])
                 user.first_name = data['firstName']
                 user.last_name = data['lastName']
 
                 user.save()
+
+                privileges = EmailPrivilege.objects.filter(
+                    email=v.first()).all()
+
+                for priv in privileges:
+                    u = UserPrivilege()
+                    u.user = user
+                    u.privilege = priv.privilege
+
+                    u.save()
+
                 return HttpResponse('Success')
 
             else:
