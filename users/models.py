@@ -39,3 +39,11 @@ class UserPrivilege(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.privilege.privilege}"
+
+
+class EmailPrivilege(models.Model):
+    email = models.ForeignKey(ValidEmail, on_delete=models.CASCADE)
+    privilege = models.ForeignKey(PrivilegeLookup, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.email} - {self.privilege.privilege}"

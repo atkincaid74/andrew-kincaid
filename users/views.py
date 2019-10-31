@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .models import ValidEmail
+from .models import ValidEmail, UserPrivilege, EmailPrivilege, PrivilegeLookup
 from rest_framework_jwt.views import (ObtainJSONWebToken, RefreshJSONWebToken,
                                       VerifyJSONWebToken)
 
@@ -79,13 +79,38 @@ class AddNewValidEmail(APIView):
     def post(self, request):
         email = request.data['email']
         paid = request.data['paid']
+        super_contest = request.data['superContest']
+        pick_six = request.data['pickSix']
+        privileges = []
+        if super_contest:
+            privileges.append(
+                PrivilegeLookup.objects.filter(
+                    privilege='supercontest').first())
+        if pick_six:
+            privileges.append(
+                PrivilegeLookup.objects.filter(privilege='picksix').first())
         if not ValidEmail.objects.filter(email=email):
             ValidEmail().add_email(email, paid)
-            return Response('Email submitted successfully.')
+            v = ValidEmail.objects.filter(email=email).first()
+
+            response_text = 'Email submitted successfully.'
+
         else:
             v = ValidEmail.objects.filter(email=email).first()
             v.paid = paid
             v.save()
-            response = 'paid' if paid else 'unpaid'
-            return Response(f'Email marked as {response}.')
+
+            EmailPrivilege.objects.filter(email=v).delete()
+
+            response_paid = 'paid' if paid else 'unpaid'
+            response_text = f'Email marked as {response_paid}. ' \
+                            f'Privileges updated.'
+
+        for priv in privileges:
+            e = EmailPrivilege()
+            e.email = v
+            e.privilege = priv
+            e.save()
+
+        return Response(response_text)
 
