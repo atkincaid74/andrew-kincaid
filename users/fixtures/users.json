@@ -1,0 +1,1 @@
+[{"model": "users.privilegelookup", "pk": 1, "fields": {"privilege": "supercontest"}}, {"model": "users.privilegelookup", "pk": 2, "fields": {"privilege": "picksix"}}, {"model": "users.privilegelookup", "pk": 3, "fields": {"privilege": "admin"}}]
