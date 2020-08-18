@@ -17,12 +17,13 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework_simplejwt import views as jwt_views
 
-from .views import redirect_view
+from .views import redirect_view, ResumeHit
 
 urlpatterns = [
     path('', redirect_view),
     path('', include('users.urls')),
     path('', include('pickem.urls')),
+    path('api/log_resume_hit/', ResumeHit.as_view()),
     path('admin/', admin.site.urls),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(),
          name='token_obtain_pair'),
