@@ -29,14 +29,15 @@ class ResumeHit(APIView):
         file_name = "resume.log"
         logger = logging.getLogger(__name__)
         logger.setLevel(level='INFO')
-        handler = logging.FileHandler(
-            os.path.join(os.path.dirname(
-                os.path.abspath(__file__)), '../log', file_name)
-        )
-        formatter = logging.Formatter(
-            '%(levelname)s - %(asctime)s - %(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+        if not logger.handlers:
+            handler = logging.FileHandler(
+                os.path.join(os.path.dirname(
+                    os.path.abspath(__file__)), '../log', file_name)
+            )
+            formatter = logging.Formatter(
+                '%(levelname)s - %(asctime)s - %(message)s')
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
         logger.info(f'RESUME HIT from {ip}')
 
         return HttpResponse(ip)
