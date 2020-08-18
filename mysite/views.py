@@ -38,6 +38,6 @@ class ResumeHit(APIView):
                 '%(levelname)s - %(asctime)s - %(message)s')
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-        logger.info(ip)
+        logger.info(f'RESUME HIT from {ip}')
 
         return HttpResponse(ip)
