@@ -1,7 +1,7 @@
 import pandas as pd
 from .models import SeasonPickem, Team, Winner
 from nflgame import games
-from nflgame.live import current_year_and_week
+from nflgame.sched import current_year_and_week
 
 
 def get_game_results():
