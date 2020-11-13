@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['localhost']
 INSTALLED_APPS = [
     'pickem.apps.PickemConfig',
     'users.apps.UsersConfig',
+    'golfscore.apps.GolfscoreConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

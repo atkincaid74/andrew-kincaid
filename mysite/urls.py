@@ -23,6 +23,7 @@ urlpatterns = [
     path('', redirect_view),
     path('', include('users.urls')),
     path('', include('pickem.urls')),
+    path('', include('golfscore.urls')),
     path('api/log_resume_hit/', ResumeHit.as_view()),
     path('admin/', admin.site.urls),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(),
