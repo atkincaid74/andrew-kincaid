@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import GolfPicksSerializer
 from .models import GolfPicks
-from .pull_pga import get_player_data, get_status
+from .pull_pga import get_player_data, get_status, get_soup, get_projected_cut
 
 
 class PicksView(APIView):
@@ -76,3 +76,12 @@ class StatusView(APIView):
     @staticmethod
     def get(request):
         return Response(get_status())
+
+
+class ProjectedCutView(APIView):
+    renderer_classes = (JSONRenderer, )
+    permission_classes = (AllowAny, )
+
+    @staticmethod
+    def get(request):
+        return Response(get_projected_cut())

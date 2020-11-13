@@ -1,36 +1,48 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 
 
-def get_players(soup, player_col, score_col, thru_col):
+def get_players(soup):
+    (player_col, score_col, thru_col, position_col, today_col,
+     total_col, round_cols) = get_col_indices(soup)
     rows = soup.find_all("tr", class_="Table__TR Table__even")
     players = {}
 
     for row in rows[1:]:
         cols = row.find_all("td")
         # If we get a bad row. For example, during the tournament we there 
-        # is a place holder row that represents the cut line
+        #  is a place holder row that represents the cut line
         if len(cols) < 5:
             continue
         player = cols[player_col].text.strip()
-        score = cols[score_col].text.strip().upper()        
-        thru = cols[thru_col].text.strip() if thru_col else "F" 
+        out_dict = {}
+        score = cols[score_col].text.strip().upper()
         if score == 'CUT':
-            players[player] = {'TO PAR': 'CUT', 'THRU': thru}
-            continue
+            out_dict['TO PAR'] = 'CUT'
         elif score == 'WD':
-            players[player] = {'TO PAR': 'WD', 'THRU': thru}
-            continue
+            out_dict['TO PAR'] = 'WD'
         elif score == 'DQ':
-            players[player] = {'TO PAR': 'DQ', 'THRU': thru}
-            continue
+            out_dict['TO PAR'] = 'DQ'
         elif score == 'E':
-            players[player] = {'TO PAR': 0, 'THRU': thru}
+            out_dict['TO PAR'] = 0
         else:
             try:
-                players[player] = {'TO PAR': int(score), 'THRU': thru}
+                out_dict['TO PAR'] = int(score)
             except ValueError:
-                players[player] = {'TO PAR': '?', 'THRU': '?'}
+                out_dict['TO PAR'] = '?'
+
+        out_dict['TODAY'] = cols[today_col].text.strip()
+        out_dict['THRU'] = cols[thru_col].text.strip() if thru_col else "F"
+        out_dict['R1'] = cols[round_cols[1]].text.strip()
+        out_dict['R2'] = cols[round_cols[2]].text.strip()
+        out_dict['R3'] = cols[round_cols[3]].text.strip()
+        out_dict['R4'] = cols[round_cols[4]].text.strip()
+        out_dict['TOTAL'] = cols[total_col].text.strip()
+        out_dict['POSITION'] = cols[position_col].text.strip()
+
+        players[player] = out_dict
+
     return players
 
 
@@ -41,12 +53,19 @@ def get_col_indices(soup):
     player_fields = ['PLAYER']
     to_par_fields = ['TO PAR', 'TOPAR', 'TO_PAR']
     thru_fields = ['THRU']
+    position_fields = ['POS', 'POSITION']
+    today_fields = ['TODAY']
+    total_fields = ['TOT', 'TOTAL']
 
     header_col = header_rows[0].find_all("th")
 
     player_col = None
     score_col = None
     thru_col = None
+    position_col = None
+    today_col = None
+    total_col = None
+    round_cols = {i: None for i in range(1, 5)}
 
     for i in range(len(header_col)):
         col_txt = header_col[i].text.strip().upper()
@@ -59,12 +78,25 @@ def get_col_indices(soup):
         if col_txt in thru_fields:
             thru_col = i
             continue
+        if col_txt in position_fields:
+            position_col = i
+            continue
+        if col_txt in today_fields:
+            today_col = i
+            continue
+        if col_txt in total_fields:
+            total_col = i
+            continue
+        if re.match(r'R\d', col_txt):
+            rnd = int(re.findall(r'\d', col_txt)[0])
+            round_cols[rnd] = i
+            continue
 
     if player_col is None or score_col is None:
         print("Unable to track columns")
-        exit()
     
-    return player_col, score_col, thru_col
+    return (player_col, score_col, thru_col, position_col, today_col,
+            total_col, round_cols)
 
 
 def verify_scrape(players):
@@ -73,7 +105,7 @@ def verify_scrape(players):
 
     bad_entry_count = 0
     for key, value in players.items():
-        scr = players[key]['TO PAR']
+        scr = value['TO PAR']
         if scr == '?':
             bad_entry_count += 1
         if type(scr) is int and (scr > 50 or scr < -50):
@@ -91,12 +123,28 @@ def get_tournament_name(soup):
     return tournament_name
 
 
-def get_player_data():
-    result = requests.get("http://www.espn.com/golf/leaderboard")
-    soup = BeautifulSoup(result.text, "html.parser")
+def get_projected_cut(soup=None):
+    if soup is None:
+        result = requests.get("http://www.espn.com/golf/leaderboard")
+        soup = BeautifulSoup(result.text, "html.parser")
 
-    player_col, score_col, thru_col = get_col_indices(soup)
-    players = get_players(soup, player_col, score_col, thru_col)
+    try:
+        projected_cut = soup.find(
+            "tr", class_="cutline Table__TR Table__even"
+        ).find("td").find("span").text.strip()
+    except Exception as e:
+        print(e)
+        projected_cut = None
+
+    return projected_cut
+
+
+def get_player_data(soup=None):
+    if soup is None:
+        result = requests.get("http://www.espn.com/golf/leaderboard")
+        soup = BeautifulSoup(result.text, "html.parser")
+
+    players = get_players(soup)
     verify_scrape(players)
 
     return players
@@ -110,8 +158,7 @@ def get_score_data():
                            class_="status")[0].find_all("span")[0].text.upper()
     active = 'FINAL' not in status
 
-    player_col, score_col, thru_col = get_col_indices(soup)
-    players = get_players(soup, player_col, score_col, thru_col)
+    players = get_players(soup)
 
     verify_scrape(players)
 
@@ -121,11 +168,19 @@ def get_score_data():
     return data
 
 
-def get_status():
-    result = requests.get("http://www.espn.com/golf/leaderboard")
-    soup = BeautifulSoup(result.text, "html.parser")
+def get_status(soup=None):
+    if soup is None:
+        result = requests.get("http://www.espn.com/golf/leaderboard")
+        soup = BeautifulSoup(result.text, "html.parser")
 
     status = soup.find_all("div",
                            class_="status")[0].find_all("span")[0].text
 
     return status
+
+
+def get_soup():
+    result = requests.get("http://www.espn.com/golf/leaderboard")
+    soup = BeautifulSoup(result.text, "html.parser")
+
+    return soup
