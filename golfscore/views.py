@@ -38,7 +38,9 @@ class PicksWithScoresView(APIView):
             df = picks_df.loc[[name]].T.merge(score_df, how='left',
                                               left_on=name, right_index=True)
             df.rename(columns={name: 'Picks'}, inplace=True)
-            df.loc['Total', 'TO PAR'] = df['TO PAR'].sum()
+            df.loc[
+                'Total', ['TO PAR', 'TODAY', 'R1', 'R2', 'R3', 'R4', 'TOTAL']
+            ] = df[['TO PAR', 'TODAY', 'R1', 'R2', 'R3', 'R4', 'TOTAL']].sum()
 
             out_dict[name] = df.to_json(orient='index')
 
