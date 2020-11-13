@@ -70,7 +70,6 @@ def get_col_indices(soup):
 def verify_scrape(players):
     if len(players) < 25:
         print("Less than 25 players, seems suspicious, so exiting")
-        exit()
 
     bad_entry_count = 0
     for key, value in players.items():
@@ -78,14 +77,12 @@ def verify_scrape(players):
         if scr == '?':
             bad_entry_count += 1
         if type(scr) is int and (scr > 50 or scr < -50):
-            print("Bad score entry, exiting")
-            exit()
+            print(f"Bad score entry {scr}")
 
     if bad_entry_count > 3:
         # arbitrary number here, I figure this is enough
         # bad entries to call it a bad pull
         print("Multiple bad entries, exiting")
-        exit()
 
 
 def get_tournament_name(soup):
