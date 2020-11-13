@@ -3,6 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def to_int(potential_int):
+    try:
+        return int(potential_int)
+    except ValueError:
+        return potential_int
+
+
 def get_players(soup):
     (player_col, score_col, thru_col, position_col, today_col,
      total_col, round_cols) = get_col_indices(soup)
@@ -32,13 +39,14 @@ def get_players(soup):
             except ValueError:
                 out_dict['TO PAR'] = '?'
 
-        out_dict['TODAY'] = cols[today_col].text.strip()
+        today = cols[today_col].text.strip()
+        out_dict['TODAY'] = to_int(today) if today.upper() != 'E' else 0
         out_dict['THRU'] = cols[thru_col].text.strip() if thru_col else "F"
-        out_dict['R1'] = cols[round_cols[1]].text.strip()
-        out_dict['R2'] = cols[round_cols[2]].text.strip()
-        out_dict['R3'] = cols[round_cols[3]].text.strip()
-        out_dict['R4'] = cols[round_cols[4]].text.strip()
-        out_dict['TOTAL'] = cols[total_col].text.strip()
+        out_dict['R1'] = to_int(cols[round_cols[1]].text.strip())
+        out_dict['R2'] = to_int(cols[round_cols[2]].text.strip())
+        out_dict['R3'] = to_int(cols[round_cols[3]].text.strip())
+        out_dict['R4'] = to_int(cols[round_cols[4]].text.strip())
+        out_dict['TOTAL'] = to_int(cols[total_col].text.strip())
         out_dict['POSITION'] = cols[position_col].text.strip()
 
         players[player] = out_dict
