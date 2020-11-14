@@ -1,5 +1,6 @@
 import re
 import requests
+import pandas as pd
 from bs4 import BeautifulSoup
 
 
@@ -51,7 +52,33 @@ def get_players(soup):
 
         players[player] = out_dict
 
-    return players
+    score_df = pd.DataFrame.from_dict(players, orient='index')
+    score_df.loc[score_df['TO PAR'] == 'WD'] = score_df.loc[
+        score_df['TO PAR'] == 'WD'].apply(fix_withdrew, axis=1)
+    score_df.loc[score_df['TO PAR'] == 'CUT'] = score_df.loc[
+        score_df['TO PAR'] == 'CUT'].apply(fix_cut, axis=1)
+
+    return score_df
+
+
+def fix_withdrew(s):
+    s.loc[s.index.str.match(r'R\d') &
+          ((~s.astype(str).str.isnumeric()) |
+           (pd.to_numeric(s, errors='coerce') < 60))] = 80
+    s.POSITION = 'WD'
+    s['TO PAR'] = s.loc[s.index.str.match(r'R\d')].sub(72).sum()
+    s['TOTAL'] = s.loc[s.index.str.match(r'R\d')].sum()
+
+    return s
+
+
+def fix_cut(s):
+    s.loc[['R3', 'R4']] = 80
+    s.POSITION = 'CUT'
+    s['TO PAR'] = s.loc[s.index.str.match(r'R\d')].sub(72).sum()
+    s['TOTAL'] = s.loc[s.index.str.match(r'R\d')].sum()
+
+    return s
 
 
 def get_col_indices(soup):
@@ -153,7 +180,7 @@ def get_player_data(soup=None):
         soup = BeautifulSoup(result.text, "html.parser")
 
     players = get_players(soup)
-    verify_scrape(players)
+    # verify_scrape(players)
 
     return players
 

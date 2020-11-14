@@ -26,8 +26,7 @@ class PicksWithScoresView(APIView):
 
     @staticmethod
     def get(request):
-        score_dict = get_player_data()
-        score_df = pd.DataFrame.from_dict(score_dict, orient='index')
+        score_df = get_player_data()
 
         picks_df = read_frame(
             GolfPicks.objects.all(), [f'player{i}' for i in range(1, 5)],
@@ -53,13 +52,7 @@ class LeaderboardView(APIView):
 
     @staticmethod
     def get(request):
-        score_dict = get_player_data()
-        score_df = pd.DataFrame.from_dict(score_dict, orient='index')
-        score_df.loc[score_df['TO PAR'] == 'WD', ['R2', 'R3', 'R4']] = 80
-        score_df.loc[score_df['TO PAR'] == 'WD', 'POSITION'] = 'WD'
-        score_df.loc[score_df['TO PAR'] == 'WD', 'TO PAR'] = score_df.loc[
-            score_df['TO PAR'] == 'WD', score_df.columns.str.match(
-                r'R\d')].sub(72).sum(1)
+        score_df = get_player_data()
 
         picks_df = read_frame(
             GolfPicks.objects.all(), [f'player{i}' for i in range(1, 5)],
