@@ -54,12 +54,18 @@ class LeaderboardView(APIView):
     @staticmethod
     def get(request):
         score_dict = get_player_data()
+        score_df = pd.DataFrame.from_dict(score_dict, orient='index')
+        score_df.loc[score_df['TO PAR'] == 'WD', ['R2', 'R3', 'R4']] = 80
+        score_df.loc[score_df['TO PAR'] == 'WD', 'POSITION'] = 'WD'
+        score_df.loc[score_df['TO PAR'] == 'WD', 'TO PAR'] = score_df.loc[
+            score_df['TO PAR'] == 'WD', score_df.columns.str.match(
+                r'R\d')].sub(72).sum(1)
 
         picks_df = read_frame(
             GolfPicks.objects.all(), [f'player{i}' for i in range(1, 5)],
             'name'
         ).rename(columns=lambda c: c.replace('player', 'Tier '))
-        picks_df = picks_df.applymap(lambda x: score_dict[x]['TO PAR'])
+        picks_df = picks_df.applymap(lambda x: score_df.loc[x, 'TO PAR'])
 
         picks_df['TOTAL'] = picks_df.sum(axis=1)
         picks_df.sort_values('TOTAL', inplace=True)
