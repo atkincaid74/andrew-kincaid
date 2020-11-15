@@ -40,9 +40,11 @@ def get_players(soup):
             except ValueError:
                 out_dict['TO PAR'] = '?'
 
-        today = cols[today_col].text.strip()
-        out_dict['TODAY'] = to_int(today) if today.upper() != 'E' else 0
-        out_dict['THRU'] = cols[thru_col].text.strip() if thru_col else "F"
+        if today_col:
+            today = cols[today_col].text.strip()
+            out_dict['TODAY'] = to_int(today) if today.upper() != 'E' else 0
+        if thru_col:
+            out_dict['THRU'] = cols[thru_col].text.strip() if thru_col else "F"
         out_dict['R1'] = to_int(cols[round_cols[1]].text.strip())
         out_dict['R2'] = to_int(cols[round_cols[2]].text.strip())
         out_dict['R3'] = to_int(cols[round_cols[3]].text.strip())
