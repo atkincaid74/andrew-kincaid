@@ -16,7 +16,7 @@ idna==2.8
 ipython==7.7.0
 ipython-genutils==0.2.0
 jedi==0.15.1
-lxml==4.4.1
+lxml==4.6.2
 nflgame-redux==3.0.0
 numpy==1.17.1
 pandas==0.25.1
