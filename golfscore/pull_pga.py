@@ -13,52 +13,67 @@ def to_int(potential_int):
 
 def get_players(soup):
     (player_col, score_col, thru_col, position_col, today_col,
-     total_col, round_cols) = get_col_indices(soup)
+     total_col, round_cols, tee_time_col) = get_col_indices(soup)
     rows = soup.find_all("tr", class_="Table__TR Table__even")
     players = {}
 
     for row in rows[1:]:
         cols = row.find_all("td")
-        # If we get a bad row. For example, during the tournament we there 
-        #  is a place holder row that represents the cut line
-        if len(cols) < 5:
-            continue
+        # # If we get a bad row. For example, during the tournament we there
+        # #  is a place holder row that represents the cut line
+        # if len(cols) < 5:
+        #     continue
         player = cols[player_col].text.strip()
         out_dict = {}
-        score = cols[score_col].text.strip().upper()
-        if score == 'CUT':
-            out_dict['TO PAR'] = 'CUT'
-        elif score == 'WD':
-            out_dict['TO PAR'] = 'WD'
-        elif score == 'DQ':
-            out_dict['TO PAR'] = 'DQ'
-        elif score == 'E':
-            out_dict['TO PAR'] = 0
-        else:
-            try:
-                out_dict['TO PAR'] = int(score)
-            except ValueError:
-                out_dict['TO PAR'] = '?'
+
+        if score_col is not None:
+            score = cols[score_col].text.strip().upper()
+            if score == 'CUT':
+                out_dict['TO PAR'] = 'CUT'
+            elif score == 'WD':
+                out_dict['TO PAR'] = 'WD'
+            elif score == 'DQ':
+                out_dict['TO PAR'] = 'DQ'
+            elif score == 'E':
+                out_dict['TO PAR'] = 0
+            else:
+                try:
+                    out_dict['TO PAR'] = int(score)
+                except ValueError:
+                    out_dict['TO PAR'] = '?'
 
         if today_col:
             today = cols[today_col].text.strip()
             out_dict['TODAY'] = to_int(today) if today.upper() != 'E' else 0
+
         if thru_col:
             out_dict['THRU'] = cols[thru_col].text.strip() if thru_col else "F"
-        out_dict['R1'] = to_int(cols[round_cols[1]].text.strip())
-        out_dict['R2'] = to_int(cols[round_cols[2]].text.strip())
-        out_dict['R3'] = to_int(cols[round_cols[3]].text.strip())
-        out_dict['R4'] = to_int(cols[round_cols[4]].text.strip())
-        out_dict['TOTAL'] = to_int(cols[total_col].text.strip())
-        out_dict['POSITION'] = cols[position_col].text.strip()
+
+        if round_cols[1] is not None:
+            out_dict['R1'] = to_int(cols[round_cols[1]].text.strip())
+        if round_cols[2] is not None:
+            out_dict['R2'] = to_int(cols[round_cols[2]].text.strip())
+        if round_cols[3] is not None:
+            out_dict['R3'] = to_int(cols[round_cols[3]].text.strip())
+        if round_cols[4] is not None:
+            out_dict['R4'] = to_int(cols[round_cols[4]].text.strip())
+
+        if total_col is not None:
+            out_dict['TOTAL'] = to_int(cols[total_col].text.strip())
+        if position_col is not None:
+            out_dict['POSITION'] = cols[position_col].text.strip()
+        if tee_time_col is not None:
+            out_dict['TEE TIME'] = cols[tee_time_col].text.strip()
 
         players[player] = out_dict
 
     score_df = pd.DataFrame.from_dict(players, orient='index')
-    score_df.loc[score_df['TO PAR'] == 'WD'] = score_df.loc[
-        score_df['TO PAR'] == 'WD'].apply(fix_withdrew, axis=1)
-    score_df.loc[score_df['TO PAR'] == 'CUT'] = score_df.loc[
-        score_df['TO PAR'] == 'CUT'].apply(fix_cut, axis=1)
+
+    if 'TO PAR' in score_df.columns:
+        score_df.loc[score_df['TO PAR'] == 'WD'] = score_df.loc[
+            score_df['TO PAR'] == 'WD'].apply(fix_withdrew, axis=1)
+        score_df.loc[score_df['TO PAR'] == 'CUT'] = score_df.loc[
+            score_df['TO PAR'] == 'CUT'].apply(fix_cut, axis=1)
 
     return score_df
 
@@ -93,6 +108,7 @@ def get_col_indices(soup):
     position_fields = ['POS', 'POSITION']
     today_fields = ['TODAY']
     total_fields = ['TOT', 'TOTAL']
+    tee_time_fields = ['TEE TIME']
 
     header_col = header_rows[0].find_all("th")
 
@@ -103,6 +119,7 @@ def get_col_indices(soup):
     today_col = None
     total_col = None
     round_cols = {i: None for i in range(1, 5)}
+    tee_time_col = None
 
     for i in range(len(header_col)):
         col_txt = header_col[i].text.strip().upper()
@@ -128,12 +145,15 @@ def get_col_indices(soup):
             rnd = int(re.findall(r'\d', col_txt)[0])
             round_cols[rnd] = i
             continue
+        if col_txt in tee_time_fields:
+            tee_time_col = i
+            continue
 
-    if player_col is None or score_col is None:
+    if player_col is None:
         print("Unable to track columns")
     
     return (player_col, score_col, thru_col, position_col, today_col,
-            total_col, round_cols)
+            total_col, round_cols, tee_time_col)
 
 
 def verify_scrape(players):
