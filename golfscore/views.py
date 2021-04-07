@@ -3,7 +3,8 @@ from django_pandas.io import read_frame
 from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.parsers import JSONParser
 from .serializers import GolfPicksSerializer
 from .models import GolfPicks
 from .pull_pga import get_player_data, get_status, get_soup, get_projected_cut
@@ -11,13 +12,38 @@ from .pull_pga import get_player_data, get_status, get_soup, get_projected_cut
 
 class PicksView(APIView):
     renderer_classes = (JSONRenderer, )
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticatedOrReadOnly, )
 
     @staticmethod
     def get(request):
         return Response(JSONRenderer().render(
-            GolfPicksSerializer(GolfPicks.objects.all()).data
+            GolfPicksSerializer(GolfPicks.objects.all(), many=True).data
         ))
+
+    @staticmethod
+    def post(request):
+        data = JSONParser().parse(request)
+        serializer = GolfPicksSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(JSONRenderer().render(serializer.data), status=201)
+        return Response(JSONRenderer().render(serializer.errors), status=400)
+
+    @staticmethod
+    def put(request):
+        data = JSONParser().parse(request)
+        old_record = GolfPicks.objects.get(name=data['name'])
+        serializer = GolfPicksSerializer(old_record, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(JSONRenderer().render(serializer.data), status=200)
+        return Response(JSONRenderer().render(serializer.errors), status=400)
+
+    @staticmethod
+    def delete(request):
+        data = JSONParser().parse(request)
+        GolfPicks.objects.get(name=data['name']).delete()
+        return Response(status=204)
 
 
 class PicksWithScoresView(APIView):
