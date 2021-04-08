@@ -104,6 +104,9 @@ class LeaderboardView(APIView):
             lambda x: sum([int(float(s)) for s in x if is_numeric(s)]), axis=1)
         picks_df.sort_values('TOTAL', inplace=True)
         picks_df['RANK'] = picks_df['TOTAL'].rank(method='min').astype(int)
+        picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'] = \
+            picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'].apply(lambda x: f'T{x}')
+        picks_df['TOTAL'] = picks_df['TOTAL'].apply(lambda s: f'+{s}' if s > 0 else s).replace(0, 'E')
 
         picks_df = picks_df.reset_index()[
             ['RANK', 'name', 'TOTAL', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4', 'Tier 5', 'Tier 6']]
