@@ -93,10 +93,11 @@ class LeaderboardView(APIView):
             return Response(picks_df.reset_index().to_json(orient='index'))
 
         def to_par_or_tee_time(x):
-            if re.match(r'^\d{1,2}$|^\a+$', score_df.loc[x, 'THRU']):
+            thru = score_df.loc[x, 'THRU']
+            if re.match(r'^\d{1,2}$|^\a+$', thru) or str(thru).upper() == 'F':
                 return score_df.loc[x, 'TO PAR']
             else:
-                return score_df.loc[x, 'THRU']
+                return thru
 
         picks_df = picks_df.applymap(to_par_or_tee_time)
 
