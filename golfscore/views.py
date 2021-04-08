@@ -82,9 +82,12 @@ class LeaderboardView(APIView):
         score_df = get_player_data()
 
         picks_df = read_frame(
-            GolfPicks.objects.all(), [f'player{i}' for i in range(1, 5)],
+            GolfPicks.objects.all(), [f'player{i}' for i in range(1, 7)],
             'name'
         ).rename(columns=lambda c: c.replace('player', 'Tier '))
+        if 'TO PAR' not in score_df.columns:
+            return Response(picks_df.reset_index().to_json(orient='index'))
+
         picks_df = picks_df.applymap(lambda x: score_df.loc[x, 'TO PAR'])
 
         picks_df['TOTAL'] = picks_df.sum(axis=1)
@@ -103,7 +106,8 @@ class StatusView(APIView):
 
     @staticmethod
     def get(request):
-        return Response(get_status())
+        status = get_status()
+        return Response(status if status != 'Tournament Field' else 'Contest not started')
 
 
 class ProjectedCutView(APIView):
