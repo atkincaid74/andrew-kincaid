@@ -55,7 +55,7 @@ class PicksWithScoresView(APIView):
         score_df = get_player_data()
 
         picks_df = read_frame(
-            GolfPicks.objects.all(), [f'player{i}' for i in range(1, 5)],
+            GolfPicks.objects.all(), [f'player{i}' for i in range(1, 7)],
             'name').rename(columns=lambda c: c.replace('player', 'Tier '))
 
         out_dict = {}
