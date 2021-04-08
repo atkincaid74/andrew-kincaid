@@ -10,6 +10,7 @@ from rest_framework.parsers import JSONParser
 from .serializers import GolfPicksSerializer
 from .models import GolfPicks
 from .pull_pga import get_player_data, get_status, get_soup, get_projected_cut
+from mysite import is_numeric
 
 
 class PicksView(APIView):
@@ -69,7 +70,7 @@ class PicksWithScoresView(APIView):
             df.loc[
                 'Total', [col for col in cols if col in df.columns]
             ] = df[[col for col in cols if col in df.columns]].apply(
-                lambda x: sum([int(float(s)) for s in x if str(s).isnumeric()]))
+                lambda x: sum([int(float(s)) for s in x if is_numeric(s)]))
 
             out_dict[name] = df.to_json(orient='index')
 
@@ -100,7 +101,7 @@ class LeaderboardView(APIView):
         picks_df = picks_df.applymap(to_par_or_tee_time)
 
         picks_df['TOTAL'] = picks_df.apply(
-            lambda x: sum([int(float(s)) for s in x if str(s).isnumeric()]), axis=1)
+            lambda x: sum([int(float(s)) for s in x if is_numeric(s)]), axis=1)
         picks_df.sort_values('TOTAL', inplace=True)
         picks_df['RANK'] = picks_df['TOTAL'].rank(method='min').astype(int)
 
