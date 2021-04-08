@@ -121,7 +121,8 @@ class LeaderboardView(APIView):
         picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'] = \
             picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'].apply(lambda x: f'T{x}')
 
-        picks_df = picks_df.applymap(clean_up_scores)
+        picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name'])] = \
+            picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name'])].applymap(clean_up_scores)
 
         picks_df = picks_df.reset_index()[
             ['RANK', 'name', 'TOTAL', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4', 'Tier 5', 'Tier 6']]
