@@ -10,7 +10,18 @@ from rest_framework.parsers import JSONParser
 from .serializers import GolfPicksSerializer
 from .models import GolfPicks
 from .pull_pga import get_player_data, get_status, get_soup, get_projected_cut
-from mysite import is_numeric
+from mysite import is_numeric, TIME_REGEX
+
+
+def clean_up_scores(s_or_t):
+    if re.match(TIME_REGEX, str(s_or_t)) or not is_numeric(s_or_t):
+        return s_or_t
+    elif int(float(s_or_t)) > 0:
+        return f'+{s_or_t}'
+    elif int(float(s_or_t)) == 0:
+        return 'E'
+    else:
+        return s_or_t
 
 
 class PicksView(APIView):
@@ -72,6 +83,8 @@ class PicksWithScoresView(APIView):
             ] = df[[col for col in cols if col in df.columns]].apply(
                 lambda x: sum([int(float(s)) for s in x if is_numeric(s)]))
 
+            df[['TO PAR', 'TODAY']] = df[['TO PAR', 'TODAY']].applymap(clean_up_scores)
+
             out_dict[name] = df.to_json(orient='index')
 
         return Response(out_dict)
@@ -94,10 +107,10 @@ class LeaderboardView(APIView):
 
         def to_par_or_tee_time(x):
             thru = score_df.loc[x, 'THRU']
-            if re.match(r'^\d{1,2}$|^\a+$', thru) or str(thru).upper() == 'F':
-                return score_df.loc[x, 'TO PAR']
-            else:
+            if re.match(TIME_REGEX, thru):
                 return thru
+            else:
+                return score_df.loc[x, 'TO PAR']
 
         picks_df = picks_df.applymap(to_par_or_tee_time)
 
@@ -107,7 +120,8 @@ class LeaderboardView(APIView):
         picks_df['RANK'] = picks_df['TOTAL'].rank(method='min').astype(int)
         picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'] = \
             picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'].apply(lambda x: f'T{x}')
-        picks_df['TOTAL'] = picks_df['TOTAL'].apply(lambda s: f'+{s}' if s > 0 else s).replace(0, 'E')
+
+        picks_df = picks_df.applymap(clean_up_scores)
 
         picks_df = picks_df.reset_index()[
             ['RANK', 'name', 'TOTAL', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4', 'Tier 5', 'Tier 6']]
