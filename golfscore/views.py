@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 from django_pandas.io import read_frame
 from rest_framework.views import APIView
@@ -66,7 +68,8 @@ class PicksWithScoresView(APIView):
             cols = ['TO PAR', 'TODAY', 'R1', 'R2', 'R3', 'R4', 'TOTAL']
             df.loc[
                 'Total', [col for col in cols if col in df.columns]
-            ] = df[[col for col in cols if col in df.columns]].sum()
+            ] = df[[col for col in cols if col in df.columns]].apply(
+                lambda x: sum([int(float(s)) for s in x if str(s).isnumeric()]))
 
             out_dict[name] = df.to_json(orient='index')
 
@@ -88,14 +91,21 @@ class LeaderboardView(APIView):
         if 'TO PAR' not in score_df.columns:
             return Response(picks_df.reset_index().to_json(orient='index'))
 
-        picks_df = picks_df.applymap(lambda x: score_df.loc[x, 'TO PAR'])
+        def to_par_or_tee_time(x):
+            if re.match(r'^\d{1,2}$|^\a+$', score_df.loc[x, 'THRU']):
+                return score_df.loc[x, 'TO PAR']
+            else:
+                return score_df.loc[x, 'THRU']
 
-        picks_df['TOTAL'] = picks_df.sum(axis=1)
+        picks_df = picks_df.applymap(to_par_or_tee_time)
+
+        picks_df['TOTAL'] = picks_df.apply(
+            lambda x: sum([int(float(s)) for s in x if str(s).isnumeric()]), axis=1)
         picks_df.sort_values('TOTAL', inplace=True)
         picks_df['RANK'] = picks_df['TOTAL'].rank(method='min').astype(int)
 
         picks_df = picks_df.reset_index()[
-            ['RANK', 'name', 'TOTAL', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4']]
+            ['RANK', 'name', 'TOTAL', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4', 'Tier 5', 'Tier 6']]
 
         return Response(picks_df.to_json(orient='index'))
 
