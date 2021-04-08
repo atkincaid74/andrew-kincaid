@@ -28,14 +28,8 @@ def get_players(soup):
 
         if score_col is not None:
             score = cols[score_col].text.strip().upper()
-            if score == 'CUT':
-                out_dict['TO PAR'] = 'CUT'
-            elif score == 'WD':
-                out_dict['TO PAR'] = 'WD'
-            elif score == 'DQ':
-                out_dict['TO PAR'] = 'DQ'
-            elif score == 'E':
-                out_dict['TO PAR'] = 0
+            if score in ('CUT', 'WD', 'DQ', 'E'):
+                out_dict['TO PAR'] = score
             else:
                 try:
                     out_dict['TO PAR'] = int(score)
@@ -44,7 +38,7 @@ def get_players(soup):
 
         if today_col:
             today = cols[today_col].text.strip()
-            out_dict['TODAY'] = to_int(today) if today.upper() != 'E' else 0
+            out_dict['TODAY'] = to_int(today)
 
         if thru_col:
             out_dict['THRU'] = cols[thru_col].text.strip() if thru_col else "F"
