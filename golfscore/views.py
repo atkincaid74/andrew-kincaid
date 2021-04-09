@@ -96,7 +96,8 @@ class LeaderboardView(APIView):
 
     @staticmethod
     def get(request):
-        score_df = get_player_data()
+        soup = get_soup()
+        score_df = get_player_data(soup)
 
         picks_df = read_frame(
             GolfPicks.objects.all(), [f'player{i}' for i in range(1, 7)],
@@ -107,7 +108,7 @@ class LeaderboardView(APIView):
 
         def to_par_or_tee_time(x):
             thru = score_df.loc[x, 'THRU']
-            if (re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1'])):
+            if re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1']):
                 return thru
             else:
                 return score_df.loc[x, 'TO PAR']
@@ -122,7 +123,7 @@ class LeaderboardView(APIView):
             picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'].apply(lambda x: f'T{x}')
 
         cut_col = '# Projected to Make Cut'
-        cut = get_projected_cut()
+        cut = get_projected_cut(soup)
         if cut is not None:
             cut = 0 if cut == 'E' else int(cut)
             picks_df[cut_col] = picks_df.apply(
