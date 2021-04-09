@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 
 CUT_SCORE = 78
+ROUND_REGEX = r'^R\d$'
+PAR = 72
 
 
 def to_int(potential_int):
@@ -76,12 +78,12 @@ def get_players(soup):
 
 
 def fix_withdrew(s):
-    s.loc[s.index.str.match(r'R\d') &
+    s.loc[s.index.str.match(ROUND_REGEX) &
           ((~s.astype(str).str.isnumeric()) |
            (pd.to_numeric(s, errors='coerce') < 60))] = CUT_SCORE
     s.POSITION = 'WD'
-    s['TO PAR'] = s.loc[s.index.str.match(r'R\d')].sub(72).sum()
-    s['TOTAL'] = s.loc[s.index.str.match(r'R\d')].sum()
+    s['TO PAR'] = s.loc[s.index.str.match(ROUND_REGEX)].sub(PAR).sum()
+    s['TOTAL'] = s.loc[s.index.str.match(ROUND_REGEX)].sum()
 
     return s
 
@@ -89,8 +91,8 @@ def fix_withdrew(s):
 def fix_cut(s):
     s.loc[['R3', 'R4']] = CUT_SCORE
     s.POSITION = 'CUT'
-    s['TO PAR'] = s.loc[s.index.str.match(r'R\d')].sub(72).sum()
-    s['TOTAL'] = s.loc[s.index.str.match(r'R\d')].sum()
+    s['TO PAR'] = s.loc[s.index.str.match(ROUND_REGEX)].sub(PAR).sum()
+    s['TOTAL'] = s.loc[s.index.str.match(ROUND_REGEX)].sum()
 
     return s
 

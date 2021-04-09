@@ -96,7 +96,8 @@ class LeaderboardView(APIView):
 
     @staticmethod
     def get(request):
-        score_df = get_player_data()
+        soup = get_soup()
+        score_df = get_player_data(soup)
 
         picks_df = read_frame(
             GolfPicks.objects.all(), [f'player{i}' for i in range(1, 7)],
@@ -107,7 +108,7 @@ class LeaderboardView(APIView):
 
         def to_par_or_tee_time(x):
             thru = score_df.loc[x, 'THRU']
-            if (re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1'])):
+            if re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1']):
                 return thru
             else:
                 return score_df.loc[x, 'TO PAR']
@@ -121,11 +122,21 @@ class LeaderboardView(APIView):
         picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'] = \
             picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'].apply(lambda x: f'T{x}')
 
-        picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name'])] = \
-            picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name'])].applymap(clean_up_scores)
+        cut_col = '# Projected to Make Cut'
+        cut = get_projected_cut(soup)
+        if cut is not None:
+            cut = 0 if cut == 'E' else int(cut)
+            picks_df[cut_col] = picks_df.apply(
+                lambda x: (x.replace('E', 0).loc[x.index.str.match(r'Tier\s\d')] <= cut).sum(), axis=1)
 
-        picks_df = picks_df.reset_index()[
-            ['RANK', 'name', 'TOTAL', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4', 'Tier 5', 'Tier 6']]
+        picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name', cut_col])] = \
+            picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name', cut_col])].applymap(clean_up_scores)
+
+        col_order = ['RANK', 'name', 'TOTAL']
+        col_order.extend(picks_df.loc[:, picks_df.columns.str.match(r'Tier\s\d')].columns)
+        col_order.extend([col for col in picks_df.columns if col not in col_order])
+
+        picks_df = picks_df.reset_index()[col_order]
 
         return Response(picks_df.to_json(orient='index'))
 
