@@ -107,7 +107,7 @@ class LeaderboardView(APIView):
 
         def to_par_or_tee_time(x):
             thru = score_df.loc[x, 'THRU']
-            if re.match(TIME_REGEX, thru):
+            if (re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1'])):
                 return thru
             else:
                 return score_df.loc[x, 'TO PAR']
