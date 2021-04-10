@@ -134,7 +134,7 @@ class LeaderboardView(APIView):
                 lambda x: (x.replace('E', 0).loc[x.index.str.match(r'Tier\s\d')] <= cut).sum(), axis=1)
         elif cut is not None:
             picks_df[cut_col] = picks_df.apply(
-                lambda x: (x.loc[x.index.str.match(r'Tier\s\d')].str.startswith('CUT:')).sum(), axis=1)
+                lambda x: 6 - (x.loc[x.index.str.match(r'Tier\s\d')].astype(str).str.startswith('CUT:')).sum(), axis=1)
             picks_df = picks_df.applymap(lambda x: x if not isinstance(x, str) else x.replace('CUT:', ''))
 
         picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name', cut_col])] = \
