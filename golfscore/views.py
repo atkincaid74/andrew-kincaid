@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.parsers import JSONParser
 from .serializers import GolfPicksSerializer
 from .models import GolfPicks
-from .pull_pga import get_player_data, get_status, get_soup, get_projected_cut
+from .pull_pga import get_player_data, get_status, get_soup, get_cut
 from mysite import is_numeric, TIME_REGEX
 
 
@@ -108,10 +108,14 @@ class LeaderboardView(APIView):
 
         def to_par_or_tee_time(x):
             thru = score_df.loc[x, 'THRU']
+            cut_ = score_df.loc[x, 'POSITION'] in ('WD', 'DQ', 'CUT')
             if re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1']):
                 return thru
             else:
-                return score_df.loc[x, 'TO PAR']
+                if not cut_:
+                    return score_df.loc[x, 'TO PAR']
+                else:
+                    return f"CUT:{score_df.loc[x, 'TO PAR']}"
 
         picks_df = picks_df.applymap(to_par_or_tee_time)
 
@@ -122,12 +126,16 @@ class LeaderboardView(APIView):
         picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'] = \
             picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'].apply(lambda x: f'T{x}')
 
-        cut_col = '# Projected to Make Cut'
-        cut = get_projected_cut(soup)
-        if cut is not None:
+        projected, cut = get_cut(soup)
+        cut_col = '# Projected to Make Cut' if projected else "# Made the Cut"
+        if cut is not None and projected:
             cut = 0 if cut == 'E' else int(cut)
             picks_df[cut_col] = picks_df.apply(
                 lambda x: (x.replace('E', 0).loc[x.index.str.match(r'Tier\s\d')] <= cut).sum(), axis=1)
+        elif cut is not None:
+            picks_df[cut_col] = picks_df.apply(
+                lambda x: (x.loc[x.index.str.match(r'Tier\s\d')].str.startswith('CUT:')).sum(), axis=1)
+            picks_df = picks_df.applymap(lambda x: x if not isinstance(x, str) else x.replace('CUT:', ''))
 
         picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name', cut_col])] = \
             picks_df.loc[:, ~picks_df.columns.isin(['RANK', 'name', cut_col])].applymap(clean_up_scores)
@@ -148,7 +156,8 @@ class StatusView(APIView):
     @staticmethod
     def get(request):
         status = get_status()
-        return Response(status if status != 'Tournament Field' else 'Contest not started')
+        return Response(status if status != 'Tournament Field'
+                        else 'Contest not started')
 
 
 class ProjectedCutView(APIView):
@@ -157,4 +166,4 @@ class ProjectedCutView(APIView):
 
     @staticmethod
     def get(request):
-        return Response(get_projected_cut())
+        return Response(get_cut())

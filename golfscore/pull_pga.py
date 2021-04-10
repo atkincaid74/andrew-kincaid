@@ -71,6 +71,8 @@ def get_players(soup):
     if 'TO PAR' in score_df.columns:
         score_df.loc[score_df['TO PAR'] == 'WD'] = score_df.loc[
             score_df['TO PAR'] == 'WD'].apply(fix_withdrew, axis=1)
+        score_df.loc[score_df['TO PAR'] == 'DQ'] = score_df.loc[
+            score_df['TO PAR'] == 'DQ'].apply(fix_disqualified, axis=1)
         score_df.loc[score_df['TO PAR'] == 'CUT'] = score_df.loc[
             score_df['TO PAR'] == 'CUT'].apply(fix_cut, axis=1)
 
@@ -82,6 +84,16 @@ def fix_withdrew(s):
           ((~s.astype(str).str.isnumeric()) |
            (pd.to_numeric(s, errors='coerce') < 60))] = CUT_SCORE
     s.POSITION = 'WD'
+    s['TO PAR'] = s.loc[s.index.str.match(ROUND_REGEX)].sub(PAR).sum()
+    s['TOTAL'] = s.loc[s.index.str.match(ROUND_REGEX)].sum()
+
+    return s
+
+
+def fix_disqualified(s):
+    # TODO figure out what to actually do about DQ
+    s.loc[['R3', 'R4']] = CUT_SCORE
+    s.POSITION = 'DQ'
     s['TO PAR'] = s.loc[s.index.str.match(ROUND_REGEX)].sub(PAR).sum()
     s['TOTAL'] = s.loc[s.index.str.match(ROUND_REGEX)].sum()
 
@@ -179,20 +191,22 @@ def get_tournament_name(soup):
     return tournament_name
 
 
-def get_projected_cut(soup=None):
+def get_cut(soup=None):
     if soup is None:
         result = requests.get("http://www.espn.com/golf/leaderboard")
         soup = BeautifulSoup(result.text, "html.parser")
 
     try:
-        projected_cut = soup.find(
+        soup_td = soup.find(
             "tr", class_="cutline Table__TR Table__even"
-        ).find("td").find("span").text.strip()
+        ).find("td")
+        cut = soup_td.find("span").text.strip()
+        projected = 'projected' in soup_td.text.lower()
     except Exception as e:
         print(e)
-        projected_cut = None
+        projected = cut = None
 
-    return projected_cut
+    return projected, cut
 
 
 def get_player_data(soup=None):
