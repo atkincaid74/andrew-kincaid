@@ -119,8 +119,20 @@ class LeaderboardView(APIView):
 
         picks_df = picks_df.applymap(to_par_or_tee_time)
 
-        picks_df['TOTAL'] = picks_df.apply(
-            lambda x: sum([int(float(s)) for s in x if is_numeric(s)]), axis=1)
+        def sum_scores(s):
+            sum_vals = 0
+            for x in s:
+                x = str(x)
+                if x.startswith('CUT:'):
+                    val = int(x.replace('CUT:', ''))
+                elif is_numeric(x):
+                    val = int(float(x))
+                else:
+                    val = 0
+                sum_vals += val
+            return sum_vals
+
+        picks_df['TOTAL'] = picks_df.apply(sum_scores, axis=1)
         picks_df.sort_values('TOTAL', inplace=True)
         picks_df['RANK'] = picks_df['TOTAL'].rank(method='min').astype(int)
         picks_df.loc[picks_df['RANK'].duplicated(keep=False), 'RANK'] = \
