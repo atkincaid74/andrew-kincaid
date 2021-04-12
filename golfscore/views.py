@@ -107,10 +107,7 @@ class LeaderboardView(APIView):
             return Response(picks_df.reset_index().to_json(orient='index'))
 
         def to_par_or_tee_time(x):
-            if 'THRU' not in score_df.columns:
-                return score_df.loc[x, 'TO PAR']
-
-            thru = score_df.loc[x, 'THRU']
+            thru = score_df.loc[x, 'THRU'] if 'THRU' in score_df.columns else 'F'
             cut_ = score_df.loc[x, 'POSITION'] in ('WD', 'DQ', 'CUT')
             if re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1']):
                 return thru
@@ -147,7 +144,7 @@ class LeaderboardView(APIView):
             cut = 0 if cut == 'E' else int(cut)
             picks_df[cut_col] = picks_df.apply(
                 lambda x: (x.replace('E', 0).loc[x.index.str.match(r'Tier\s\d')] <= cut).sum(), axis=1)
-        elif cut is not None:
+        elif cut is not None or is_numeric(score_df.iloc[0].loc['R4']):
             picks_df[cut_col] = picks_df.apply(
                 lambda x: 6 - (x.loc[x.index.str.match(r'Tier\s\d')].astype(str).str.startswith('CUT:')).sum(), axis=1)
             picks_df = picks_df.applymap(lambda x: x if not isinstance(x, str) else x.replace('CUT:', ''))
