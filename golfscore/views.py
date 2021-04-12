@@ -107,6 +107,9 @@ class LeaderboardView(APIView):
             return Response(picks_df.reset_index().to_json(orient='index'))
 
         def to_par_or_tee_time(x):
+            if 'THRU' not in score_df.columns:
+                return score_df.loc[x, 'TO PAR']
+
             thru = score_df.loc[x, 'THRU']
             cut_ = score_df.loc[x, 'POSITION'] in ('WD', 'DQ', 'CUT')
             if re.match(TIME_REGEX, thru) and not is_numeric(score_df.loc[x, 'R1']):
