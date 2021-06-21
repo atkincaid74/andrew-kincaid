@@ -10,5 +10,5 @@ router.register(r'rounds', RoundViewSet, 'round')
 urlpatterns = router.urls
 
 urlpatterns += [
-    path('api/handicap', HandicapView.as_view()),
+    path('api/handicap/', HandicapView.as_view()),
 ]

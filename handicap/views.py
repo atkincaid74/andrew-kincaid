@@ -1,4 +1,4 @@
-from django_pandas.io import read_frame
+import datetime
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -39,6 +39,17 @@ class HandicapView(APIView):
 
     @staticmethod
     def get(request):
-        rounds = read_frame(Round.objects.filter(user__email=request.user))
+        handicap_records = HandicapHistory.objects.filter(
+            user=request.user)
 
-        return Response('hello')
+        if not handicap_records:
+            return Response(status=204)
+
+        else:
+            current = handicap_records.order_by('-date').first().handicap
+            low = handicap_records.filter(
+                date__gte=datetime.datetime.now() -
+                datetime.timedelta(days=365)).order_by(
+                'handicap').first().handicap
+
+            return Response({'current': current, 'low': low})
