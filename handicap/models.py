@@ -144,7 +144,7 @@ class Tee(models.Model):
     scorecard = models.ForeignKey(Scorecard, on_delete=models.DO_NOTHING)
 
     class Meta:
-        unique_together = ('course', 'color',)
+        unique_together = ('course', 'gender', 'holes', 'color',)
 
     def __str__(self):
         return (f'{self.course.name} - {self.color} - '
