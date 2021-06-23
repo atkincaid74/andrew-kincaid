@@ -1,4 +1,3 @@
-import datetime
 import re
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
@@ -6,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.fields import (IntegerField, CharField, ChoiceField,
-                                   FloatField, DateField, empty)
+                                   FloatField, DateField, empty, BooleanField)
 from rest_framework.serializers import PrimaryKeyRelatedField
 from .serializers import *
 from .models import *
@@ -62,7 +61,10 @@ class SerializerToForm(APIView):
 
         out_dict = {}
         for field_name, field in serializer.fields.items():
-            if field.read_only:
+            if field.read_only:  # No need to provide input for read-only
+                continue
+
+            if field_name == 'user':  # User is filled out automatically
                 continue
 
             component_dict = {'label': field_name.title(), 'value': None}
@@ -109,6 +111,9 @@ class SerializerToForm(APIView):
 
             elif isinstance(field, DateField):
                 component_dict['component'] = 'DateField'
+
+            elif isinstance(field, BooleanField):
+                component_dict['component'] = 'v-checkbox'
 
             out_dict[field_name] = component_dict
 

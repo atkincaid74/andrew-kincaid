@@ -1,5 +1,5 @@
 from .models import *
-from rest_framework.serializers import ModelSerializer, ReadOnlyField
+from rest_framework.serializers import ModelSerializer
 
 
 class CourseSerializer(ModelSerializer):
@@ -30,7 +30,7 @@ class RoundSerializer(ModelSerializer):
     class Meta:
         model = Round
         exclude = ['course_handicap', 'score_out', 'score_in', 'gross',
-                   'differential']
+                   'differential', 'nh_already_used', 'nine_holes_combined']
 
     def validate(self, attrs):
         instance = Round(**attrs)

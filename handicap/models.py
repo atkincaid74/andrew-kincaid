@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -9,7 +10,7 @@ from .references import state_abbr, states, initial_handicap_adjustments
 class Course(models.Model):
     name = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
-    state = models.CharField(max_length=2, null=True,
+    state = models.CharField(max_length=2, null=True, blank=True,
                              choices=list(zip(state_abbr, states)))
     country = models.CharField(max_length=255, default='USA')
 
@@ -131,6 +132,8 @@ class Tee(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     gender = models.CharField(
         max_length=1, choices=[('M', 'Men'), ('W', 'Women'), ('B', 'Both')])
+    holes = models.CharField(
+        max_length=1, choices=[('T', '18'), ('F', 'Front 9'), ('B', 'Back 9')])
 
     color = models.CharField(max_length=255)
     rating = models.FloatField()
@@ -142,7 +145,8 @@ class Tee(models.Model):
         unique_together = ('course', 'color',)
 
     def __str__(self):
-        return f'{self.course.name} - {self.color}'
+        return (f'{self.course.name} - {self.color} - '
+                f'{self.get_holes_display()}')
 
 
 class Round(models.Model):
@@ -150,59 +154,80 @@ class Round(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
 
+    @property
+    def nine_holes(self):
+        return self.tee.holes != 'T'
+
+    nh_already_used = models.BooleanField(default=False)
+    nine_holes_combined = models.BooleanField(default=False)
+
     course_handicap = models.IntegerField(null=True, blank=True)
 
     @property
-    def get_course_handicap(self):
+    def current_handicap(self):
         handicap_set = HandicapHistory.objects.filter(
             user=self.user, date__lte=self.date)
         if not handicap_set:
             return None
         else:
-            current_handicap = handicap_set.order_by('-date').first().handicap
-            return (current_handicap * (self.tee.slope / 113) +
+            return handicap_set.order_by('-date').first().handicap
+
+    @property
+    def get_course_handicap(self):
+        if self.current_handicap is None:
+            return None
+        else:
+            return (self.current_handicap * (self.tee.slope / 113) +
                     (self.tee.rating - self.tee.scorecard.par))
 
-    score1 = models.IntegerField()
-    score2 = models.IntegerField()
-    score3 = models.IntegerField()
-    score4 = models.IntegerField()
-    score5 = models.IntegerField()
-    score6 = models.IntegerField()
-    score7 = models.IntegerField()
-    score8 = models.IntegerField()
-    score9 = models.IntegerField()
+    score1 = models.IntegerField(null=True, blank=True)
+    score2 = models.IntegerField(null=True, blank=True)
+    score3 = models.IntegerField(null=True, blank=True)
+    score4 = models.IntegerField(null=True, blank=True)
+    score5 = models.IntegerField(null=True, blank=True)
+    score6 = models.IntegerField(null=True, blank=True)
+    score7 = models.IntegerField(null=True, blank=True)
+    score8 = models.IntegerField(null=True, blank=True)
+    score9 = models.IntegerField(null=True, blank=True)
     score_out = models.IntegerField(blank=True)
 
     @property
     def get_score_out(self):
-        return sum([getattr(self, f'score{i}') for i in range(1, 10)])
+        scores = [getattr(self, f'score{i}') for i in range(1, 10)]
+        if any([s is None for s in scores]):
+            return 0
+        return sum(scores)
 
-    score10 = models.IntegerField()
-    score11 = models.IntegerField()
-    score12 = models.IntegerField()
-    score13 = models.IntegerField()
-    score14 = models.IntegerField()
-    score15 = models.IntegerField()
-    score16 = models.IntegerField()
-    score17 = models.IntegerField()
-    score18 = models.IntegerField()
+    score10 = models.IntegerField(null=True, blank=True)
+    score11 = models.IntegerField(null=True, blank=True)
+    score12 = models.IntegerField(null=True, blank=True)
+    score13 = models.IntegerField(null=True, blank=True)
+    score14 = models.IntegerField(null=True, blank=True)
+    score15 = models.IntegerField(null=True, blank=True)
+    score16 = models.IntegerField(null=True, blank=True)
+    score17 = models.IntegerField(null=True, blank=True)
+    score18 = models.IntegerField(null=True, blank=True)
     score_in = models.IntegerField(blank=True)
 
     @property
     def get_score_in(self):
-        return sum([getattr(self, f'score{i}') for i in range(10, 19)])
+        scores = [getattr(self, f'score{i}') for i in range(10, 19)]
+        if any([s is None for s in scores]):
+            return 0
+        return sum(scores)
 
     gross = models.IntegerField(blank=True)
 
     @property
     def get_gross(self):
-        return self.get_score_out + self.get_score_in
+        return self.score_out + self.score_in
 
-    differential = models.FloatField(blank=True)
+    differential = models.FloatField(blank=True, null=True)
 
     @property
     def get_differential(self):
+        if self.differential is not None:
+            return self.differential
         return (113 / self.tee.slope) * (self.get_gross - self.tee.rating)
 
     def __str__(self):
@@ -259,24 +284,96 @@ class HandicapHistory(models.Model):
 
 @receiver(post_save, sender=Round, dispatch_uid="update_handicap")
 def update_handicap(sender, instance, created, **kwargs):
-    if created:
-        rounds = Round.objects.filter(user=instance.user)
-        num_rounds = len(rounds)
-        if num_rounds < 3:  # Cannot create handicap before 3 rounds entered
+    if not created:
+        return
+
+    # First combine any nine hole rounds if possible
+    if instance.nine_holes:
+        nine_hole_round = Round.objects.filter(
+            ~models.Q(id=instance.id),
+            tee__holes__in=['F', 'B'], nh_already_used=False)
+        # If there's no other nine-hole rounds, we can't update handicap
+        if not nine_hole_round:
             return
-        elif num_rounds < 20:  # Use modified calc until 20 rounds entered
-            round_count = initial_handicap_adjustments[num_rounds]['count']
-            adjustment = initial_handicap_adjustments[num_rounds]['adjustment']
-        else:  # Standard calc uses 8 of last 20, no adjustment
-            rounds = rounds.order_by('-date')[:20]
-            round_count = 8
-            adjustment = 0
 
-        counted_rounds = rounds.order_by('differential')[:round_count]
-        handicap = (sum([r.differential for r in counted_rounds]) /
-                    round_count + adjustment)
+        other_nine_holes = nine_hole_round.order_by('-date').first()
+        tee = Tee.objects.get(course__name='Nine-Hole Combined')
 
-        new_handicap = HandicapHistory(
-            user=instance.user, date=instance.date, handicap=handicap,
-            trigger_round=instance)
-        new_handicap.save()
+        new_attrs = {
+            'tee': tee, 'nine_holes_combined': True, 'date': instance.date,
+            'user': instance.user, 'differential':
+                instance.differential + other_nine_holes.differential}
+        if instance.tee.holes == 'F':
+            new_attrs.update({f'score{i + 9}': getattr(instance, f'score{i}')
+                              for i in range(1, 10)})
+            new_attrs['score_in'] = instance.score_out
+        else:
+            new_attrs.update({f'score{i}': getattr(instance, f'score{i}')
+                              for i in range(10, 19)})
+            new_attrs['score_in'] = instance.score_in
+        if other_nine_holes.tee.holes == 'F':
+            new_attrs.update({
+                f'score{i}': getattr(other_nine_holes, f'score{i}')
+                for i in range(1, 10)})
+            new_attrs['score_out'] = other_nine_holes.score_out
+        else:
+            new_attrs.update({
+                f'score{i - 9}': getattr(other_nine_holes, f'score{i}')
+                for i in range(10, 19)})
+            new_attrs['score_out'] = other_nine_holes.score_in
+
+        new_attrs['gross'] = new_attrs['score_out'] + new_attrs['score_in']
+        new_round = Round(**new_attrs)
+        new_round.save()
+
+        instance.nh_already_used = True
+        other_nine_holes.nh_already_used = True
+        instance.save()
+        other_nine_holes.save()
+
+    rounds = Round.objects.filter(user=instance.user, tee__holes='T')
+
+    # Check if an exceptional score adjustment is needed - section 5.9
+    if instance.current_handicap is not None:
+        if instance.current_handicap - instance.differential > 7:
+            exceptional_adjustment = (
+                -2 if instance.current_handicap - instance.differential > 10
+                else -1)
+            for round_ in rounds.order_by('-date')[:20]:
+                round_.differential += exceptional_adjustment
+                round_.save()
+            rounds = Round.objects.filter(user=instance.user, tee__holes='T')
+
+    num_rounds = len(rounds)
+    if num_rounds < 3:  # Cannot create handicap before 3 rounds entered
+        return
+    elif num_rounds < 20:  # Use modified calc until 20 rounds entered
+        round_count = initial_handicap_adjustments[num_rounds]['count']
+        adjustment = initial_handicap_adjustments[num_rounds]['adjustment']
+        low = None
+    else:  # Standard calc uses 8 of last 20, no adjustment
+        rounds = rounds.order_by('-date')[:20]
+        round_count = 8
+        adjustment = 0
+        low = HandicapHistory.objects.filter(
+            user=instance.user,
+            date__gte=datetime.datetime.now() - datetime.timedelta(days=365)
+        ).order_by('handicap').first().handicap
+
+    counted_rounds = rounds.order_by('differential')[:round_count]
+    handicap = (sum([r.differential for r in counted_rounds]) /
+                round_count + adjustment)
+    handicap = min(handicap, 54.0)
+
+    if low is not None:
+        # Apply soft and hard caps - section 5.8
+        diff = handicap - low
+        if diff > 5:
+            handicap = low + 5
+        elif diff > 3:
+            handicap = low + 3 + (diff - 3) / 2
+
+    new_handicap = HandicapHistory(
+        user=instance.user, date=instance.date, handicap=handicap,
+        trigger_round=instance)
+    new_handicap.save()
