@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.core.validators import MinValueValidator, MaxValueValidator
 from .references import state_abbr, states, initial_handicap_adjustments
 
 
@@ -82,6 +83,49 @@ class Scorecard(models.Model):
         self.par_in = self.get_par_in
         self.par = self.get_par
 
+    def to_dict(self):
+        return {
+            'par1': self.par1,
+            'si1': self.si1,
+            'par2': self.par2,
+            'si2': self.si2,
+            'par3': self.par3,
+            'si3': self.si3,
+            'par4': self.par4,
+            'si4': self.si4,
+            'par5': self.par5,
+            'si5': self.si5,
+            'par6': self.par6,
+            'si6': self.si6,
+            'par7': self.par7,
+            'si7': self.si7,
+            'par8': self.par8,
+            'si8': self.si8,
+            'par9': self.par9,
+            'si9': self.si9,
+            'par_out': self.par_out,
+            'par10': self.par10,
+            'si10': self.si10,
+            'par11': self.par11,
+            'si11': self.si11,
+            'par12': self.par12,
+            'si12': self.si12,
+            'par13': self.par13,
+            'si13': self.si13,
+            'par14': self.par14,
+            'si14': self.si14,
+            'par15': self.par15,
+            'si15': self.si15,
+            'par16': self.par16,
+            'si16': self.si16,
+            'par17': self.par17,
+            'si17': self.si17,
+            'par18': self.par18,
+            'si18': self.si18,
+            'par_in': self.par_in,
+            'par': self.par
+        }
+
 
 class Tee(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -90,7 +134,8 @@ class Tee(models.Model):
 
     color = models.CharField(max_length=255)
     rating = models.FloatField()
-    slope = models.IntegerField()
+    slope = models.IntegerField(validators=[MinValueValidator(55),
+                                            MaxValueValidator(155)])
     scorecard = models.ForeignKey(Scorecard, on_delete=models.DO_NOTHING)
 
     class Meta:
@@ -170,6 +215,36 @@ class Round(models.Model):
         self.score_in = self.get_score_in
         self.gross = self.get_gross
         self.differential = self.get_differential
+
+    def to_dict(self):
+        return {
+            'tee': self.tee,
+            'user': self.user,
+            'date': self.date,
+            'course_handicap': self.course_handicap,
+            'score1': self.score1,
+            'score2': self.score2,
+            'score3': self.score3,
+            'score4': self.score4,
+            'score5': self.score5,
+            'score6': self.score6,
+            'score7': self.score7,
+            'score8': self.score8,
+            'score9': self.score9,
+            'score_out': self.score_out,
+            'score10': self.score10,
+            'score11': self.score11,
+            'score12': self.score12,
+            'score13': self.score13,
+            'score14': self.score14,
+            'score15': self.score15,
+            'score16': self.score16,
+            'score17': self.score17,
+            'score18': self.score18,
+            'score_in': self.score_in,
+            'gross': self.gross,
+            'differential': self.differential,
+        }
 
 
 class HandicapHistory(models.Model):

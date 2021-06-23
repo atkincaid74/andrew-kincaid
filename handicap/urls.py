@@ -11,4 +11,6 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path('api/handicap/', HandicapView.as_view()),
+    path('api/handicap/serializer/<str:serializer_name>/',
+         SerializerToForm.as_view())
 ]

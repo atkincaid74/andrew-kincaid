@@ -1,5 +1,5 @@
 from .models import *
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ReadOnlyField
 
 
 class CourseSerializer(ModelSerializer):
@@ -17,10 +17,23 @@ class TeeSerializer(ModelSerializer):
 class ScorecardSerializer(ModelSerializer):
     class Meta:
         model = Scorecard
-        fields = '__all__'
+        exclude = ['par_out', 'par_in', 'par']
+
+    def validate(self, attrs):
+        instance = Scorecard(**attrs)
+        instance.clean()
+
+        return instance.to_dict()
 
 
 class RoundSerializer(ModelSerializer):
     class Meta:
         model = Round
-        fields = '__all__'
+        exclude = ['course_handicap', 'score_out', 'score_in', 'gross',
+                   'differential']
+
+    def validate(self, attrs):
+        instance = Round(**attrs)
+        instance.clean()
+
+        return instance.to_dict()
