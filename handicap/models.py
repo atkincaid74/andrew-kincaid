@@ -77,7 +77,9 @@ class Scorecard(models.Model):
         return self.get_par_out + self.get_par_in
 
     def __str__(self):
-        return f'Par {self.get_par} ({self.id})'
+        tees = [f'{tee.course.name} - {tee.get_gender_display()}'
+                for tee in self.tee_set.all()]
+        return f"Par {self.get_par} ({', '.join(set(tees))})"
 
     def clean(self):
         self.par_out = self.get_par_out
