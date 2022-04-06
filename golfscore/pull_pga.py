@@ -19,7 +19,7 @@ def to_int(potential_int):
 def get_players(soup):
     (player_col, score_col, thru_col, position_col, today_col,
      total_col, round_cols, tee_time_col) = get_col_indices(soup)
-    rows = soup.find_all("tr", class_="Table__TR Table__even")
+    rows = soup.find_all("tr", class_="PlayerRow__Overview PlayerRow__Overview--expandable Table__TR Table__even")
     players = {}
 
     for row in rows[1:]:
